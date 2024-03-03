@@ -3,7 +3,7 @@ import { UploadReportPictureRequest } from "../dtos/requests/uploadReportPicture
 import { NotFoundError, BadRequestError, InternalServerError } from "../errors"
 import { updateReport } from "../models/report"
 import s3 from "../storage/s3"
-import sharp from 'sharp';
+import sharp from 'sharp'
 
 export const uploadReportPictureUC = async (request: UploadReportPictureRequest): Promise<void> => {
 

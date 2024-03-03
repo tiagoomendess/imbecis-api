@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { createReportUC } from "../useCases/createReport";
 import { getReportByIdUC } from "../useCases/getReportById";
-import { newReportDto } from "../dtos/responses/reportDto";
 import { UploadReportPictureRequest } from "../dtos/requests/uploadReportPictureRequest";
 import BaseResponse from "../dtos/responses/baseResponse";
 import { ObjectId } from "mongodb";
@@ -9,26 +8,26 @@ import { ObjectId } from "mongodb";
 import { uploadReportPictureUC } from "../useCases/uploadReportPicture";
 
 export const createReport = async (req: Request, res: Response, next: NextFunction) => {
+    console.log("Body: ", req.body)
+    console.log("Params: ", req.params)
+    console.log("Query: ", req.query)
     createReportUC(req)
         .then((result) => {
             res.status(201).send({
                 success: true,
                 message: "Report created successfully",
-                payload: newReportDto(result)
-            } as BaseResponse);
+                payload: result
+            } as BaseResponse)
         })
         .catch((error) => {
-            next(error);
+            next(error)
         });
-};
+}
 
 export const getReportById = async (req: Request, res: Response, next: NextFunction) => {
-    if (!ObjectId.isValid(req.params.id)) {
-        return res.status(400).send({
-            success: false,
-            message: "Invalid id"
-        } as BaseResponse);
-    }
+    console.log("Body: ", req.body)
+    console.log("Params: ", req.params)
+    console.log("Query: ", req.query)
 
     getReportByIdUC(req.params.id)
         .then((result) => {
@@ -43,11 +42,15 @@ export const getReportById = async (req: Request, res: Response, next: NextFunct
                 success: code === 200,
                 message: message,
                 payload: result
-            } as BaseResponse);
+            } as BaseResponse)
         })
 }
 
 export const uploadPicture = async (req: Request, res: Response, next: NextFunction) => {
+    console.log("Body: ", req.body)
+    console.log("Params: ", req.params)
+    console.log("Query: ", req.query)
+
     if (!req.file) {
         return res.status(404).send({
             success: false,

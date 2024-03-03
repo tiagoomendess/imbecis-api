@@ -29,11 +29,15 @@ export interface Report {
 const collection = 'reports';
 
 export const getReports =
-    async (): Promise<Report[]> => {
+    async (page : number = 1): Promise<Report[]> => {
+
         const reports = await db
             .collection<Report>(collection)
             .find()
+            .skip((page - 1) * 10)
+            .limit(10)
             .toArray();
+
         return reports;
     };
 

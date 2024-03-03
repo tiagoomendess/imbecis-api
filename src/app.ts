@@ -4,8 +4,8 @@ import userRoutes from './routes/userRoutes'
 import reportRoutes from './routes/reportRoutes'
 
 import errorMiddleware from './middlewares/errorHandler'
+import injectExtraData from './middlewares/injectExtraData'
 import cors from 'cors'
-import { connectDB } from './database/mongoose'
 
 const corsOption = {
     origin: "*",
@@ -16,6 +16,7 @@ const app = express()
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 app.use(cors(corsOption))
+app.use(injectExtraData)
 
 // Routes
 app.use('/', indexRoutes)

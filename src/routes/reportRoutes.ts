@@ -1,8 +1,8 @@
-
 import express from 'express'
 import { createReport, getReportById, uploadPicture } from '../controllers/reportController';
 import validationMiddleware from '../middlewares/validate';
 import { CreateReportRequest } from '../dtos/requests/CreateReportRequest';
+import { GetReportByIdRequest } from '../dtos/requests/getReportByIdRequest';
 import multer from 'multer';
 import { UploadReportPictureRequest } from '../dtos/requests/uploadReportPictureRequest';
 import { BadRequestError } from '../errors';
@@ -29,6 +29,6 @@ const router = express.Router()
 // Create a new report
 router.post('/', validationMiddleware(CreateReportRequest), createReport)
 router.post('/:id/upload-picture', upload.single('picture'), validationMiddleware(UploadReportPictureRequest), uploadPicture)
-router.get('/:id', getReportById)
+router.get('/:id', validationMiddleware(GetReportByIdRequest), getReportById)
 
 export default router;
