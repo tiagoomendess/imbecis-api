@@ -1,17 +1,27 @@
 import { Request, Response, NextFunction } from "express";
-import { createReportUC } from "../useCases/createReport";
-import { getReportByIdUC } from "../useCases/getReportById";
-import { UploadReportPictureRequest } from "../dtos/requests/uploadReportPictureRequest";
 import BaseResponse from "../dtos/responses/baseResponse";
-import { ObjectId } from "mongodb";
+
+import { UploadReportPictureRequest } from "../dtos/requests/uploadReportPictureRequest";
+import { CreateReportRequest } from "../dtos/requests/createReportRequest";
+import { GetReportForReviewRequest } from "../dtos/requests/getReportForReviewRequest";
+import { GetReportByIdRequest } from "../dtos/requests/getReportByIdRequest";
+import { GetFeedRequest } from "../dtos/requests/getFeedRequest";
+import { VoteRequest } from "../dtos/requests/voteRequest";
 
 import { uploadReportPictureUC } from "../useCases/uploadReportPicture";
+import { getReportForReviewUC } from "../useCases/getReportForReview";
+import { createReportUC } from "../useCases/createReport";
+import { getReportByIdUC } from "../useCases/getReportById";
+import { getFeedUC } from "../useCases/getFeed";
+import { voteUC } from "../useCases/vote";
+
+import { BadRequestError } from "../errors";
 
 export const createReport = async (req: Request, res: Response, next: NextFunction) => {
     console.log("Body: ", req.body)
     console.log("Params: ", req.params)
     console.log("Query: ", req.query)
-    createReportUC(req)
+    createReportUC(req.body as CreateReportRequest)
         .then((result) => {
             res.status(201).send({
                 success: true,
@@ -25,17 +35,13 @@ export const createReport = async (req: Request, res: Response, next: NextFuncti
 }
 
 export const getReportById = async (req: Request, res: Response, next: NextFunction) => {
-    console.log("Body: ", req.body)
-    console.log("Params: ", req.params)
-    console.log("Query: ", req.query)
-
-    getReportByIdUC(req.params.id)
+    getReportByIdUC(req.body as GetReportByIdRequest)
         .then((result) => {
-            let code : number = 200
-            let message : string = "Report found"
+            let code: number = 200
+            let message: string = "Report was found"
             if (!result) {
                 code = 404
-                message = "Report not found"
+                message = `Report with the id ${req.params.reportId} was not found`
             }
 
             res.status(code).send({
@@ -47,35 +53,63 @@ export const getReportById = async (req: Request, res: Response, next: NextFunct
 }
 
 export const uploadPicture = async (req: Request, res: Response, next: NextFunction) => {
-    console.log("Body: ", req.body)
-    console.log("Params: ", req.params)
-    console.log("Query: ", req.query)
+    try {
+        if (!req.file) {
+            throw new BadRequestError('Picture file was not in the request');
+        }
+        
+        await uploadReportPictureUC(req.body as UploadReportPictureRequest)
 
-    if (!req.file) {
-        return res.status(404).send({
-            success: false,
-            message: "Picture file was not in the request",
+        res.status(200).send({
+            success: true,
+            message: "Picture uploaded successfully",
             payload: null,
         } as BaseResponse);
-    }
-
-    if (!ObjectId.isValid(req.params.id)) {
-        return res.status(400).send({
-            success: false,
-            message: "Invalid report id"
-        } as BaseResponse);
-    }
-
-    try {
-        const reportId = ObjectId.createFromHexString(req.params.id);
-        await uploadReportPictureUC(new UploadReportPictureRequest(req.file, reportId))
     } catch (error) {
         return next(error);
     }
+}
 
-    res.status(200).send({
-        success: true,
-        message: "Picture uploaded successfully",
-        payload: null,
-    } as BaseResponse);
+export const getReportForReview = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await getReportForReviewUC(req.body as GetReportForReviewRequest)
+
+        res.status(200).send({
+            success: true,
+            message: "Report for review",
+            payload: result
+        } as BaseResponse)
+    } catch (error) {
+        return next(error)
+    }
+}
+
+export const getFeed = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const reports = await getFeedUC(req.body as GetFeedRequest)
+
+        res.status(200).send({
+            success: true,
+            message: "Feed",
+            payload: reports
+        } as BaseResponse)
+    } catch (error) {
+        return next(error)
+    }
+}
+
+export const vote = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let result = await voteUC(req.body as VoteRequest)
+
+        res.status(200).send({
+            success: true,
+            message: result ? "Vote was registered" : "Vote was not registered",
+            payload: {
+                voteRegistered: result
+            }
+        } as BaseResponse)
+    } catch (error) {
+        return next(error)
+    }
 }

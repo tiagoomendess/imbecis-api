@@ -1,10 +1,10 @@
 import { IsMongoId } from "class-validator";
 
 export class GetReportByIdRequest {
-    constructor(id?: string) {
-        this.id = id ?? ""
+    constructor(reportId?: string) {
+        this.reportId = reportId ?? ""
     }
 
     @IsMongoId()
-    public id : string
+    public reportId : string
 }

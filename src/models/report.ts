@@ -4,12 +4,9 @@ import { ObjectId } from 'mongodb';
 
 export const STATUS = {
     NEW: 'new',
-    WAIT_PICTURE: 'wait_picture',
-    FILL_EXTRA_INFO: 'fill_extra_info',
     REVIEW: 'review',
     REJECTED: 'rejected',
-    APPROVED: 'approved',
-    REVIEW_REQUESTED: 'review_requested',
+    CONFIRMED: 'confirmed',
 }
 
 export interface Report {
@@ -29,7 +26,7 @@ export interface Report {
 const collection = 'reports';
 
 export const getReports =
-    async (page : number = 1): Promise<Report[]> => {
+    async (page: number = 1): Promise<Report[]> => {
 
         const reports = await db
             .collection<Report>(collection)
@@ -66,6 +63,42 @@ export const getReportById =
     async (id: ObjectId): Promise<Report | null> => {
         const user = await db
             .collection<Report>(collection)
-            .findOne({ _id: id});
+            .findOne({ _id: id });
         return user;
     };
+
+export const getReportForReview =
+    async (ipAddress: string, deviceUUID: string, location: Coordinate): Promise<Report | null> => {
+        // Find one report that has a different ip address and deviceUUID
+        // and updated at more than 5 minutes ago
+        // order by createdAt ascending
+        const report = await db
+            .collection<Report>(collection)
+            .findOne({
+                status: STATUS.REVIEW,
+                ipAddress: { $ne: ipAddress },
+                deviceUUID: { $ne: deviceUUID },
+                updatedAt: { $lt: new Date(Date.now() - 3 * 60 * 1000) }
+            }, {
+                sort: { createdAt: 'asc' }
+            });
+
+        return report
+    }
+
+export const getConfirmedReports =
+    async (page: number = 1): Promise<Report[]> => {
+        const reports = await db
+            .collection<Report>(collection)
+            .find({
+                status: STATUS.CONFIRMED,
+                municipality: { $exists: true },
+            }, {
+                sort: { createdAt: 'desc' }
+            })
+            .skip((page - 1) * 10)
+            .limit(10)
+            .toArray()
+
+        return reports
+    }

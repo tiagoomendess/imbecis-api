@@ -1,6 +1,9 @@
-interface Coordinate {
-    latitude: number;
-    longitude: number;
-}
+export class Coordinate {
+    constructor(latitude: number, longitude: number) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 
-export type { Coordinate };
+    public latitude: number;
+    public longitude: number;
+}

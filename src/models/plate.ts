@@ -11,22 +11,22 @@ export interface Plate {
 
 const collection = 'plates';
 
-export const createReport =
+export const createPlate =
     async (plate: Plate): Promise<ObjectId | null> => {
-        plate.createdAt = new Date();
-        plate.updatedAt = new Date();
+        plate.createdAt = new Date()
+        plate.updatedAt = new Date()
 
         const result = await db
             .collection<Plate>(collection)
             .insertOne(plate);
-        return result.insertedId ? result.insertedId : null;
+        return result.insertedId ? result.insertedId : null
     };
 
 export const getPlateById =
     async (id: ObjectId): Promise<Plate | null> => {
         const plate = await db
             .collection<Plate>(collection)
-            .findOne({ _id: id});
+            .findOne({ _id: id})
         return plate;
     };
 
@@ -34,14 +34,33 @@ export const getPlateByNumberAndCountry =
     async (number: string, country: string): Promise<Plate | null> => {
         const plate = await db
             .collection<Plate>(collection)
-            .findOne({ number, country });
-        return plate;
+            .findOne({ number, country })
+        return plate
     };
 
 export const deletePlateById =
     async (id: ObjectId): Promise<boolean> => {
         const result = await db
             .collection<Plate>(collection)
-            .deleteOne({ _id: id });
-        return result.deletedCount > 0;
+            .deleteOne({ _id: id })
+        return result.deletedCount > 0
+    }
+
+export const getOrCreatePlate =
+    async (number: string, country: string): Promise<Plate> => {
+        let plate = await getPlateByNumberAndCountry(number, country)
+        if (!plate) {
+            const now = new Date()
+            plate = {
+                country,
+                number,
+                createdAt: now,
+                updatedAt: now,
+            } as Plate;
+            const newId = await createPlate(plate)
+            if (!newId)
+                throw new Error('Error creating plate')
+            plate._id = newId;
+        }
+        return plate;
     }

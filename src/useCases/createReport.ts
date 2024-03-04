@@ -1,19 +1,22 @@
-import { CreateReportRequest } from "../dtos/requests/CreateReportRequest";
+import { CreateReportRequest } from "../dtos/requests/createReportRequest";
 import { STATUS, createReport, getReportById } from "../models/report";
 import type { Report } from "../models/report";
-import { Request } from "express";
+import { type ReportDto, newReportDto } from "../dtos/responses/reportDto";
+import { getMunicipalityByCoords } from "../gateways/geoApiPT";
 
-export const createReportUC = async (request : Request) => {
-    const reportDto = request.body as CreateReportRequest;
+export const createReportUC = async (request : CreateReportRequest) : Promise<ReportDto | null> => {
+
+    const municipality = await getMunicipalityByCoords(request.location.latitude, request.location.longitude)
 
     const result = await createReport({
         location: {
-            latitude: reportDto.location.latitude,
-            longitude: reportDto.location.longitude
+            latitude: request.location.latitude,
+            longitude: request.location.longitude
         },
-        deviceUUID: reportDto.deviceUUID,
-        ipAddress: request.headers['x-forwarded-for'] as string || request.connection.remoteAddress as string,
-        userAgent: request.headers['user-agent'] as string,
+        municipality: municipality ?? undefined,
+        deviceUUID: request.deviceUUID,
+        ipAddress: request.ipAddress,
+        userAgent: request.userAgent,
         status: STATUS.NEW,
     } as Report)
 
@@ -22,6 +25,6 @@ export const createReportUC = async (request : Request) => {
     }
 
     const created = await getReportById(result);
-    
-    return created;
+
+    return newReportDto(created);
 }

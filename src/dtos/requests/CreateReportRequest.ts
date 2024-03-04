@@ -1,11 +1,12 @@
-import { IsNotEmpty, IsObject, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { IsIP, IsNotEmpty, IsObject, IsString, IsUUID, ValidateNested, Length } from 'class-validator';
 import { CoordinateDto } from '../coordinateDto';
-
 
 export class CreateReportRequest {
     constructor() {
-        this.location = new CoordinateDto();
-        this.deviceUUID = '';
+        this.location = new CoordinateDto()
+        this.deviceUUID = ''
+        this.userAgent = ''
+        this.ipAddress = ''
     }
 
     @IsNotEmpty({ message: 'Location is required'})
@@ -17,4 +18,11 @@ export class CreateReportRequest {
     @IsNotEmpty({ message: 'Device UUID is required'})
     @IsUUID(4, { message: 'Device UUID is invalid'})
     public deviceUUID: string;
+
+    @IsString({ message: 'User Agent is not a string invalid'})
+    @Length(5, 300)
+    public userAgent: string
+
+    @IsIP()
+    public ipAddress: string
 }

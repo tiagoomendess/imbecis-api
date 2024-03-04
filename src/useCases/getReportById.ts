@@ -1,10 +1,11 @@
 import { ObjectId } from 'mongodb';
 import { getReportById, type Report } from '../models/report'
 import { newReportDto, type ReportDto } from '../dtos/responses/reportDto'
+import { GetReportByIdRequest } from '../dtos/requests/getReportByIdRequest'
 import s3 from '../storage/s3'
 
-export const getReportByIdUC = async (id: string): Promise<ReportDto | null> => {
-    const objectId = new ObjectId(id)
+export const getReportByIdUC = async (request: GetReportByIdRequest): Promise<ReportDto | null> => {
+    const objectId = new ObjectId(request.reportId)
     const report = await getReportById(objectId)
 
     let dto = newReportDto(report)

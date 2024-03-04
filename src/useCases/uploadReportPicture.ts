@@ -2,13 +2,13 @@ import { getReportById } from "../models/report"
 import { UploadReportPictureRequest } from "../dtos/requests/uploadReportPictureRequest"
 import { NotFoundError, BadRequestError, InternalServerError } from "../errors"
 import { updateReport } from "../models/report"
+import { ObjectId } from "mongodb"
 import s3 from "../storage/s3"
 import sharp from 'sharp'
 
 export const uploadReportPictureUC = async (request: UploadReportPictureRequest): Promise<void> => {
-
-    // try find report by id
-    const report = await getReportById(request.reportId);
+    const reportId = new ObjectId(request.reportId);
+    const report = await getReportById(reportId);
     if (!report) {
         throw new NotFoundError(`Report with the id ${request.reportId} was not found`);
     }
