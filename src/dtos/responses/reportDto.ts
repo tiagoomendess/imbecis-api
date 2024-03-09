@@ -1,4 +1,5 @@
 import { Report } from "../../models/report";
+import { newPlateDto, type PlateDto } from "./plateDto";
 
 export interface ReportDto {
     id: string
@@ -7,6 +8,7 @@ export interface ReportDto {
     municipality?: string
     picture?: string
     plateId?: string
+    plate?: PlateDto
     createdAt: Date
     updatedAt: Date
 }
@@ -23,6 +25,7 @@ export const newReportDto = (report: Report | null): ReportDto | null => {
         municipality: report.municipality,
         picture: report.picture,
         plateId: report.plateId?.toString(),
+        plate: newPlateDto(report.plate),
         createdAt: report.createdAt,
         updatedAt: report.updatedAt
     }

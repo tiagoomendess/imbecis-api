@@ -12,12 +12,12 @@ export class CreateReportRequest {
     @IsNotEmpty({ message: 'Location is required'})
     @IsObject({ message: 'Location is invalid'})
     @ValidateNested()
-    public location: CoordinateDto;
+    public location: CoordinateDto
 
     @IsString({ message: 'Device UUID is not a string invalid'})
     @IsNotEmpty({ message: 'Device UUID is required'})
     @IsUUID(4, { message: 'Device UUID is invalid'})
-    public deviceUUID: string;
+    public deviceUUID: string
 
     @IsString({ message: 'User Agent is not a string invalid'})
     @Length(5, 300)

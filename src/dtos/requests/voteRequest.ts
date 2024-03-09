@@ -1,4 +1,4 @@
-import { IsIP, IsMongoId, IsUUID, IsString, Length, IsIn, ValidateNested, IsObject, IsNotEmpty } from "class-validator"
+import { IsIP, IsMongoId, IsUUID, IsString, Length, IsIn, ValidateNested, IsObject, IsNotEmpty, IsOptional } from "class-validator"
 import { CoordinateDto } from '../coordinateDto'
 import { AVAILABLE_COUNTRY_CODES } from '../../utils/constants'
 import { RESULTS } from '../../models/reportVote'
@@ -10,7 +10,7 @@ export class VoteRequest {
         deviceUUID: string = "",
         ipAddress: string = "",
         userAgent: string = "",
-        plateNumer: string = "",
+        plateNumber: string = "",
         plateCountry: string = "",
         result: string = "",
         location: CoordinateDto = new CoordinateDto()
@@ -19,7 +19,7 @@ export class VoteRequest {
         this.deviceUUID = deviceUUID
         this.ipAddress = ipAddress
         this.userAgent = userAgent
-        this.plateNumer = plateNumer
+        this.plateNumber = plateNumber
         this.plateCountry = plateCountry
         this.result = result
         this.location = location
@@ -40,8 +40,8 @@ export class VoteRequest {
 
     @Transform(({ value }) => value.toUpperCase())
     @IsString({ message: 'Plate Number is not a string invalid'})
-    @Length(3, 10)
-    public plateNumer: string
+    @IsOptional()
+    public plateNumber: string
 
     @Transform(({ value }) => value.toLowerCase())
     @IsString({ message: 'Plate Country is not a string invalid'})
@@ -50,7 +50,7 @@ export class VoteRequest {
 
 
     @IsString({ message: 'Result is not a string invalid'})
-    @IsIn([RESULTS.IMBECILE, RESULTS.NOT_IMBECILE, RESULTS.NOT_SURE])
+    @IsIn([RESULTS.IMBECILE, RESULTS.NOT_SURE])
     public result: string
 
     @IsNotEmpty({ message: 'Location is required'})

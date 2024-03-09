@@ -7,7 +7,6 @@ import { getReportVotesByReportId, ReportVote, createReportVote, RESULTS } from 
 import { ObjectId } from "mongodb"
 
 export const voteUC = async (request : VoteRequest) : Promise<boolean> => {
-    console.log('voteUC', request)
     const reportId = new ObjectId(request.reportId)
     const getReportPromise = getReportById(reportId)
     const getCurrentVotesPromise = getReportVotesByReportId(reportId)
@@ -21,15 +20,17 @@ export const voteUC = async (request : VoteRequest) : Promise<boolean> => {
     for (const currentVote of currentVotes) {
         // If it's too similar, don't allow it
         if (currentVote.deviceUUID === request.deviceUUID || currentVote.ipAddress === request.ipAddress || currentVote.userAgent === request.userAgent)
-            return false
+            throw new BadRequestError('Vote too similar to a previous vote')
     }
+
+    const plateNumber = request.plateNumber.replace(/-/g, '').toUpperCase()
 
     const newVote = {
         reportId: reportId,
         deviceUUID: request.deviceUUID,
         ipAddress: request.ipAddress,
         userAgent: request.userAgent,
-        plateNumer: request.plateNumer,
+        plateNumber: plateNumber,
         plateCountry: request.plateCountry,
         result: request.result,
         location: report.location,
@@ -61,10 +62,10 @@ const runTransitionVerification = async (report : Report, votes : ReportVote[]) 
     for (const vote of votes) {
         totalVotes++
 
-        if (plateNumbers[vote.plateNumer] === undefined)
-            plateNumbers[vote.plateNumer] = 1
+        if (plateNumbers[vote.plateNumber] === undefined)
+            plateNumbers[vote.plateNumber] = 1
         else
-            plateNumbers[vote.plateNumer]++
+            plateNumbers[vote.plateNumber]++
 
         if (plateCountry[vote.plateCountry] === undefined)
             plateCountry[vote.plateCountry] = 1
@@ -81,12 +82,12 @@ const runTransitionVerification = async (report : Report, votes : ReportVote[]) 
     const mostVotedCountry = Object.keys(plateCountry).sort((a, b) => plateCountry[b] - plateCountry[a])[0]
 
     const imbecileVotes = voteResults[RESULTS.IMBECILE] ?? 0
-    const notImbecileVotes = voteResults[RESULTS.NOT_IMBECILE] ?? 0
+    const notSureVotes = voteResults[RESULTS.NOT_SURE] ?? 0
 
     // If there are 3 or more cotes with result = imbecile and all the votes agree on the same plate number, confirm the report
     if (imbecileVotes >= 3 && imbecileVotes > totalVotes / 2) {
         for (const plateNumber in plateNumbers) {
-            if (plateNumbers[plateNumber] >= 3) {
+            if (plateNumbers[plateNumber] >= 3 && plateNumber != "") {
                 const plate = await getOrCreatePlate(plateNumber, mostVotedCountry)
                 report.plateId = plate._id
                 report.status = STATUS.CONFIRMED
@@ -96,7 +97,7 @@ const runTransitionVerification = async (report : Report, votes : ReportVote[]) 
         }
     }
 
-    if (notImbecileVotes >= 3 && notImbecileVotes > totalVotes / 2) {
+    if (notSureVotes >= 3 && notSureVotes > totalVotes / 2) {
         report.status = STATUS.REJECTED
         await updateReport(report)
         return

@@ -4,7 +4,6 @@ import { ObjectId } from 'mongodb'
 
 export const RESULTS = {
     IMBECILE: 'imbecile',
-    NOT_IMBECILE: 'not_imbecile',
     NOT_SURE: 'not_sure',
 }
 
@@ -14,7 +13,7 @@ export interface ReportVote {
     deviceUUID: string
     ipAddress: string
     userAgent: string
-    plateNumer: string
+    plateNumber: string
     plateCountry: string
     result: string
     location: Coordinate

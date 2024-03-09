@@ -9,7 +9,7 @@ export const getReportForReviewUC = async (request : GetReportForReviewRequest) 
     const location = new Coordinate(request.latitude, request.longitude)
     const report = await getReportForReview(request.ipAddress, request.deviceUUID, location)
 
-    // Update updated at so it does not get served again
+    // Update updated at so it does not get served again soon
     if (report) {
         updateReport(report)
     }

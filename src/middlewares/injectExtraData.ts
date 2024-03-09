@@ -7,7 +7,7 @@ const injectExtraData = (req: Request, res: Response, next: NextFunction) => {
   let requestData = req.method === 'GET' ? req.query : req.body
 
   // Get extra info
-  requestData.ipAddress = req.headers['cf-connecting-ip'] as string || req.headers['x-forwarded-for'] as string || undefined
+  requestData.ipAddress = req.headers['cf-connecting-ip'] as string || req.headers['x-forwarded-for'] as string || req.socket.remoteAddress as string || undefined
   requestData.ipCountry = req.headers['cf-ipcountry'] as string || undefined
   requestData.deviceUUID = req.headers['device-uuid'] as string || req.headers['deviceUUID'] as string || undefined
   requestData.userAgent = req.headers['user-agent'] as string || undefined

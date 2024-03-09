@@ -4,8 +4,8 @@ import { getConfirmedReports } from "../models/report"
 import s3 from "../storage/s3"
 
 export const getFeedUC = async (request : GetFeedRequest) : Promise<ReportDto[]> => {
-
     const reports = await getConfirmedReports(request.page)
+
     const dtos = [] as ReportDto[]
     for (const report of reports) {
         const dto = newReportDto(report)

@@ -18,9 +18,6 @@ import { voteUC } from "../useCases/vote";
 import { BadRequestError } from "../errors";
 
 export const createReport = async (req: Request, res: Response, next: NextFunction) => {
-    console.log("Body: ", req.body)
-    console.log("Params: ", req.params)
-    console.log("Query: ", req.query)
     createReportUC(req.body as CreateReportRequest)
         .then((result) => {
             res.status(201).send({
@@ -60,7 +57,7 @@ export const uploadPicture = async (req: Request, res: Response, next: NextFunct
         
         await uploadReportPictureUC(req.body as UploadReportPictureRequest)
 
-        res.status(200).send({
+        res.status(201).send({
             success: true,
             message: "Picture uploaded successfully",
             payload: null,
@@ -101,10 +98,9 @@ export const getFeed = async (req: Request, res: Response, next: NextFunction) =
 export const vote = async (req: Request, res: Response, next: NextFunction) => {
     try {
         let result = await voteUC(req.body as VoteRequest)
-
-        res.status(200).send({
+        res.status(201).send({
             success: true,
-            message: result ? "Vote was registered" : "Vote was not registered",
+            message: "Vote was registered",
             payload: {
                 voteRegistered: result
             }

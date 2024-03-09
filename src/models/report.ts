@@ -1,6 +1,7 @@
 import type { Coordinate } from './coordinate';
 import db from '../database/mongo'
 import { ObjectId } from 'mongodb';
+import type { Plate } from './plate';
 
 export const STATUS = {
     NEW: 'new',
@@ -15,6 +16,7 @@ export interface Report {
     municipality?: string;
     picture?: string;
     plateId?: ObjectId;
+    plate?: Plate;
     location: Coordinate;
     deviceUUID: string;
     ipAddress: string;
@@ -28,15 +30,30 @@ const collection = 'reports';
 export const getReports =
     async (page: number = 1): Promise<Report[]> => {
 
-        const reports = await db
-            .collection<Report>(collection)
-            .find()
-            .skip((page - 1) * 10)
-            .limit(10)
-            .toArray();
+        const reportsWithPlates = await db
+        .collection<Report>(collection)
+        .aggregate<Report>([
+            { $skip: (page - 1) * 10 },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: "plates", // Replace with your Plate collection name
+                    localField: "plateId",
+                    foreignField: "_id",
+                    as: "plate"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$plate",
+                    preserveNullAndEmptyArrays: true // Keeps reports even if there is no matching plate
+                }
+            }
+        ])
+        .toArray();
 
-        return reports;
-    };
+    return reportsWithPlates;
+    }
 
 export const createReport =
     async (report: Report): Promise<ObjectId | null> => {
@@ -61,44 +78,87 @@ export const updateReport =
 
 export const getReportById =
     async (id: ObjectId): Promise<Report | null> => {
-        const user = await db
+        const report = await db
             .collection<Report>(collection)
-            .findOne({ _id: id });
-        return user;
+            .aggregate<Report>([
+                {
+                    $match: { _id: id }
+                },
+                {
+                    $lookup: {
+                        from: "plates",
+                        localField: "plateId",
+                        foreignField: "_id",
+                        as: "plate"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$plate",
+                        preserveNullAndEmptyArrays: true
+                    }
+                }
+            ])
+            .toArray();
+        //.findOne({ _id: id });
+        return report[0] ?? null;
     };
 
 export const getReportForReview =
     async (ipAddress: string, deviceUUID: string, location: Coordinate): Promise<Report | null> => {
-        // Find one report that has a different ip address and deviceUUID
-        // and updated at more than 5 minutes ago
-        // order by createdAt ascending
         const report = await db
             .collection<Report>(collection)
-            .findOne({
-                status: STATUS.REVIEW,
-                ipAddress: { $ne: ipAddress },
-                deviceUUID: { $ne: deviceUUID },
-                updatedAt: { $lt: new Date(Date.now() - 3 * 60 * 1000) }
-            }, {
-                sort: { createdAt: 'asc' }
-            });
+            .aggregate<Report>([
+                {
+                    $lookup: {
+                        from: "reportVotes",
+                        localField: "_id",
+                        foreignField: "reportId",
+                        as: "reportVotes"
+                    }
+                },
+                {
+                    $match: {
+                        "reportVotes.ipAddress": { $ne: ipAddress },
+                        "reportVotes.deviceUUID": { $ne: deviceUUID },
+                        "status": STATUS.REVIEW,
+                        "ipAddress": { $ne: ipAddress },
+                        "deviceUUID": { $ne: deviceUUID },
+                        "updatedAt": { $lt: new Date(Date.now() - 1 * 60 * 1000) } // Change this later to 5 minutes
+                    }
+                },
+                {
+                    $sample: { size: 1 }
+                }
+            ]).toArray();
 
-        return report
+        return report[0] ?? null;
     }
 
-export const getConfirmedReports =
-    async (page: number = 1): Promise<Report[]> => {
-        const reports = await db
+    export const getConfirmedReports = async (page: number = 1): Promise<Report[]> => {
+        const reportsWithPlates = await db
             .collection<Report>(collection)
-            .find({
-                status: STATUS.CONFIRMED,
-                municipality: { $exists: true },
-            }, {
-                sort: { createdAt: 'desc' }
-            })
-            .skip((page - 1) * 10)
-            .limit(10)
-            .toArray()
-
-        return reports
-    }
+            .aggregate<Report>([
+                { $match: { status: STATUS.CONFIRMED, municipality: { $exists: true } } },
+                { $sort: { createdAt: -1 } },
+                { $skip: (page - 1) * 10 },
+                { $limit: 10 },
+                {
+                    $lookup: {
+                        from: 'plates',
+                        localField: 'plateId',
+                        foreignField: '_id',
+                        as: 'plate'
+                    }
+                },
+                {
+                    $unwind: {
+                        path: '$plate',
+                        preserveNullAndEmptyArrays: true
+                    }
+                }
+            ])
+            .toArray();
+    
+        return reportsWithPlates;
+    };

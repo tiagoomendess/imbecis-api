@@ -1,4 +1,4 @@
-import { getReportById } from "../models/report"
+import { STATUS, getReportById } from "../models/report"
 import { UploadReportPictureRequest } from "../dtos/requests/uploadReportPictureRequest"
 import { NotFoundError, BadRequestError, InternalServerError } from "../errors"
 import { updateReport } from "../models/report"
@@ -31,6 +31,7 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
     try {
         await s3.uploadFile(filePath, buffer, 'image/webp')
         report.picture = filePath
+        report.status = STATUS.REVIEW
         await updateReport(report)
     } catch (error) {
         console.error("Could not upload picture to S3: ", error);
