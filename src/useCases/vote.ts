@@ -33,7 +33,6 @@ export const voteUC = async (request : VoteRequest) : Promise<boolean> => {
         plateNumber: plateNumber,
         plateCountry: request.plateCountry,
         result: request.result,
-        location: report.location,
     } as ReportVote
 
     const newVoteId = await createReportVote(newVote)

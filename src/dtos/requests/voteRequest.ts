@@ -13,7 +13,6 @@ export class VoteRequest {
         plateNumber: string = "",
         plateCountry: string = "",
         result: string = "",
-        location: CoordinateDto = new CoordinateDto()
     ) {
         this.reportId = reportId
         this.deviceUUID = deviceUUID
@@ -22,7 +21,6 @@ export class VoteRequest {
         this.plateNumber = plateNumber
         this.plateCountry = plateCountry
         this.result = result
-        this.location = location
     }
 
     @IsMongoId()
@@ -52,9 +50,4 @@ export class VoteRequest {
     @IsString({ message: 'Result is not a string invalid'})
     @IsIn([RESULTS.IMBECILE, RESULTS.NOT_SURE])
     public result: string
-
-    @IsNotEmpty({ message: 'Location is required'})
-    @IsObject({ message: 'Location is invalid'})
-    @ValidateNested()
-    public location: CoordinateDto
 }
