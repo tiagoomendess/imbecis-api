@@ -7,7 +7,7 @@ import s3 from '../storage/s3'
 export const getReportForReviewUC = async (request : GetReportForReviewRequest) : Promise<ReportDto | null> => {
 
     const location = new Coordinate(request.latitude, request.longitude)
-    const report = await getReportForReview(request.ipAddress, request.deviceUUID, location)
+    const report = await getReportForReview(request.ipAddress, request.deviceUUID, request.userAgent, location)
 
     // Update updated at so it does not get served again soon
     if (report) {

@@ -5,6 +5,8 @@ import reportRoutes from './routes/reportRoutes'
 
 import errorMiddleware from './middlewares/errorHandler'
 import injectExtraData from './middlewares/injectExtraData'
+import requestLoggerMiddleware from './middlewares/requestLogger';
+
 import cors from 'cors'
 
 const corsOption = {
@@ -17,6 +19,7 @@ app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 app.use(cors(corsOption))
 app.use(injectExtraData)
+app.use(requestLoggerMiddleware)
 
 // Routes
 app.use('/', indexRoutes)

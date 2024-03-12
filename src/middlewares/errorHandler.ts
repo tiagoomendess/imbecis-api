@@ -18,11 +18,12 @@ const errorMiddleware = (err: any, req: Request, res: Response, next: NextFuncti
       statusCode = 403;
       break;
     default:
-      err.status || 500
+      statusCode = err.status || 500
       break;
   }
 
   const message = err.message || 'Something went wrong';
+  console.error(`Error ${statusCode}: ${message}:`, err);
 
   res.status(statusCode).send({
     success: false,
