@@ -104,7 +104,7 @@ export const getReportById =
     };
 
 export const getReportForReview =
-    async (ipAddress: string, deviceUUID: string, userAgent: string, location: Coordinate): Promise<Report | null> => {
+    async (ipAddress: string, deviceUUID: string, userAgent: string): Promise<Report | null> => {
         const report = await db
             .collection<Report>(collection)
             .aggregate<Report>([
@@ -120,12 +120,11 @@ export const getReportForReview =
                     $match: {
                         "reportVotes.ipAddress": { $ne: ipAddress },
                         "reportVotes.deviceUUID": { $ne: deviceUUID },
-                        "reportVotes.userAgent": { $ne: userAgent },
                         "status": STATUS.REVIEW,
                         "ipAddress": { $ne: ipAddress },
                         "deviceUUID": { $ne: deviceUUID },
                         "userAgent": { $ne: userAgent },
-                        "updatedAt": { $lt: new Date(Date.now() - (0.5 * 60 * 1000)) } // Change this later to 5 minutes
+                        "updatedAt": { $lt: new Date(Date.now() - (5 * 60 * 1000)) } // Change this later to 5 minutes
                     }
                 },
                 {

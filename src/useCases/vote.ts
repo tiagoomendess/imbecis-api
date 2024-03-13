@@ -19,7 +19,7 @@ export const voteUC = async (request : VoteRequest) : Promise<boolean> => {
 
     for (const currentVote of currentVotes) {
         // If it's too similar, don't allow it
-        if (currentVote.deviceUUID === request.deviceUUID || currentVote.ipAddress === request.ipAddress || currentVote.userAgent === request.userAgent)
+        if (currentVote.deviceUUID === request.deviceUUID || currentVote.ipAddress === request.ipAddress)
             throw new BadRequestError('Vote too similar to a previous vote')
     }
 
