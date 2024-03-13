@@ -140,7 +140,7 @@ export const getConfirmedReports = async (page: number = 1): Promise<Report[]> =
         .collection<Report>(collection)
         .aggregate<Report>([
             { $match: { status: STATUS.CONFIRMED, municipality: { $exists: true } } },
-            { $sort: { createdAt: -1 } },
+            { $sort: { updatedAt: -1 } },
             { $skip: (page - 1) * 10 },
             { $limit: 10 },
             {
