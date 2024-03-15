@@ -162,3 +162,34 @@ export const getConfirmedReports = async (page: number = 1): Promise<Report[]> =
 
     return reportsWithPlates;
 };
+
+export const getReportsByPlateId = async (plateId: ObjectId, page: number = 1): Promise<Report[]> => {
+    const reportsWithPlates = await db
+        .collection<Report>(collection)
+        .aggregate<Report>([
+            { $match: { 
+                plateId : plateId,
+                status: STATUS.CONFIRMED,
+            } },
+            { $sort: { updatedAt: -1 } },
+            { $skip: (page - 1) * 10 },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: 'plates',
+                    localField: 'plateId',
+                    foreignField: '_id',
+                    as: 'plate'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$plate',
+                    preserveNullAndEmptyArrays: true
+                }
+            }
+        ])
+        .toArray();
+
+    return reportsWithPlates;
+}

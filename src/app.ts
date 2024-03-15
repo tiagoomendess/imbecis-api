@@ -2,6 +2,7 @@ import express from 'express'
 import indexRoutes from './routes/indexRoutes'
 import userRoutes from './routes/userRoutes'
 import reportRoutes from './routes/reportRoutes'
+import plateRoutes from './routes/plateRoutes'
 
 import errorMiddleware from './middlewares/errorHandler'
 import injectExtraData from './middlewares/injectExtraData'
@@ -25,6 +26,7 @@ app.use(requestLoggerMiddleware)
 app.use('/', indexRoutes)
 app.use('/users', userRoutes)
 app.use('/reports', reportRoutes)
+app.use('/plates', plateRoutes)
 
 app.use(errorMiddleware)
 

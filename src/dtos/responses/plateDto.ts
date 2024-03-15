@@ -12,7 +12,7 @@ export const newPlateDto = (plate?: Plate): PlateDto | undefined => {
     }
 
     return {
-        id: plate?._id.toString(),
+        id: plate._id.toString(),
         country: plate?.country,
         number: plate?.number
     };
