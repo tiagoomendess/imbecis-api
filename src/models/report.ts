@@ -124,7 +124,7 @@ export const getReportForReview =
                         "ipAddress": { $ne: ipAddress },
                         "deviceUUID": { $ne: deviceUUID },
                         "userAgent": { $ne: userAgent },
-                        "updatedAt": { $lt: new Date(Date.now() - (5 * 60 * 1000)) } // Change this later to 5 minutes
+                        "updatedAt": { $lt: new Date(Date.now() - (10 * 60 * 1000)) } // Change this later to 5 minutes
                     }
                 },
                 {
