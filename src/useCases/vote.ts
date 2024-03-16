@@ -19,8 +19,10 @@ export const voteUC = async (request : VoteRequest) : Promise<boolean> => {
 
     for (const currentVote of currentVotes) {
         // If it's too similar, don't allow it
-        if (currentVote.deviceUUID === request.deviceUUID || currentVote.ipAddress === request.ipAddress)
+        if (currentVote.deviceUUID === request.deviceUUID || currentVote.ipAddress === request.ipAddress) {
+            console.warn(`Vote too similar to a previous vote ${report.plate?.number}`)
             throw new BadRequestError('Vote too similar to a previous vote')
+        }
     }
 
     const plateNumber = request.plateNumber.replace(/-/g, '').toUpperCase()
@@ -36,8 +38,10 @@ export const voteUC = async (request : VoteRequest) : Promise<boolean> => {
     } as ReportVote
 
     const newVoteId = await createReportVote(newVote)
-    if (!newVoteId)
+    if (!newVoteId) {
+        console.error(`Did not registered new vote for report ${reportId}`)
         throw new InternalServerError('Error creating vote')
+    }
 
     newVote._id = newVoteId
     currentVotes.push(newVote)
@@ -91,14 +95,16 @@ const runTransitionVerification = async (report : Report, votes : ReportVote[]) 
                 report.plateId = plate._id
                 report.status = STATUS.CONFIRMED
                 await updateReport(report)
+                console.log(`Report ${report._id} confirmed imbecile with plate ${mostVotedCountry} ${plateNumber}`)
                 return
             }
         }
     }
 
-    if (notSureVotes >= 3 && notSureVotes > totalVotes / 2) {
+    if (notSureVotes >= 4 && notSureVotes > totalVotes / 2) {
         report.status = STATUS.REJECTED
         await updateReport(report)
+        console.log(`Report ${report._id} rejected`)
         return
     }
 }
