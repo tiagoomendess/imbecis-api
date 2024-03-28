@@ -94,6 +94,9 @@ const runTransitionVerification = async (report : Report, votes : ReportVote[]) 
                 const plate = await getOrCreatePlate(plateNumber, mostVotedCountry)
                 report.plateId = plate._id
                 report.status = STATUS.CONFIRMED
+                report.userAgent = "redacted"
+                report.ipAddress = "redacted"
+                report.deviceUUID = "redacted"
                 await updateReport(report)
                 console.log(`Report ${report._id} confirmed imbecile with plate ${mostVotedCountry} ${plateNumber}`)
                 return
