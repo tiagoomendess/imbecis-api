@@ -66,7 +66,7 @@ export const getOrCreatePlate =
             } as Plate;
             const newId = await createPlate(plate)
             if (!newId)
-                throw new Error('Error creating plate')
+                throw new Error('Erro ao criar matrícula')
             plate._id = newId;
         }
         return plate;

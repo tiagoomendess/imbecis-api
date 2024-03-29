@@ -10,7 +10,7 @@ export const getPlateReportsUC = async (request: GetPlateReportsRequest): Promis
     const reports = await getReportsByPlateId(plateId, request.page);
 
     if (reports.length === 0) {
-        throw new NotFoundError('Reports not found for this plate');
+        throw new NotFoundError('Não foram encontradas denúncias para esta matrícula');
     }
 
     const dtos = [] as ReportDto[]

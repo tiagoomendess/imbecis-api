@@ -52,7 +52,7 @@ export const getReportById = async (req: Request, res: Response, next: NextFunct
 export const uploadPicture = async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!req.file) {
-            throw new BadRequestError('Picture file was not in the request');
+            throw new BadRequestError('Fotografia não foi encontrada no pedido');
         }
         
         await uploadReportPictureUC(req.body as UploadReportPictureRequest)

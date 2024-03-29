@@ -21,7 +21,7 @@ export const createReportUC = async (request : CreateReportRequest) : Promise<Re
     } as Report)
 
     if (!result) {
-        throw new Error('Error creating report');
+        throw new Error('Erro ao criar denúncia');
     }
 
     const created = await getReportById(result);

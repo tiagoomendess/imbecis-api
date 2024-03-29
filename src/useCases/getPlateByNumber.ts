@@ -6,7 +6,7 @@ import { NotFoundError } from "../errors";
 export const getPlateByNumberUC = async (request: GetPlateByNumberRequest): Promise<PlateDto | null> => {
     const plate = await getPlateByNumberAndCountry(request.number, request.country);
     if (!plate) {
-        throw new NotFoundError('Plate not found');
+        throw new NotFoundError('Matrícula não encontrada');
     }
 
     const dto = newPlateDto(plate);

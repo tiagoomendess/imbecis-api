@@ -6,22 +6,22 @@ import { getReportById } from "../models/report";
 import { getReportVotesByReportId, ReportVote, createReportVote, RESULTS } from "../models/reportVote";
 import { ObjectId } from "mongodb"
 
-export const voteUC = async (request : VoteRequest) : Promise<boolean> => {
+export const voteUC = async (request: VoteRequest): Promise<boolean> => {
     const reportId = new ObjectId(request.reportId)
     const getReportPromise = getReportById(reportId)
     const getCurrentVotesPromise = getReportVotesByReportId(reportId)
-    const result = await Promise.all([ getReportPromise, getCurrentVotesPromise ])
+    const result = await Promise.all([getReportPromise, getCurrentVotesPromise])
     const report = result[0]
     const currentVotes = result[1]
 
     if (!report)
-        throw new BadRequestError(`Report with the id ${request.reportId} was not found`)
+        throw new BadRequestError(`Denúncia com o id ${request.reportId} não foi encontrada`)
 
     for (const currentVote of currentVotes) {
         // If it's too similar, don't allow it
         if (currentVote.deviceUUID === request.deviceUUID || currentVote.ipAddress === request.ipAddress) {
             console.warn(`Vote too similar to a previous vote ${report.plate?.number}`)
-            throw new BadRequestError('Vote too similar to a previous vote')
+            throw new BadRequestError('Possível voto duplicado')
         }
     }
 
@@ -40,7 +40,7 @@ export const voteUC = async (request : VoteRequest) : Promise<boolean> => {
     const newVoteId = await createReportVote(newVote)
     if (!newVoteId) {
         console.error(`Did not registered new vote for report ${reportId}`)
-        throw new InternalServerError('Error creating vote')
+        throw new InternalServerError('Erro ao guardar o voto')
     }
 
     newVote._id = newVoteId
@@ -54,12 +54,12 @@ export const voteUC = async (request : VoteRequest) : Promise<boolean> => {
 /**
  * Checks if the report has enough votes to be verified
  */
-const runTransitionVerification = async (report : Report, votes : ReportVote[]) => {
+const runTransitionVerification = async (report: Report, votes: ReportVote[]) => {
 
     // Hash map of string to number
-    const plateNumbers : { [key: string]: number } = {}
-    const plateCountry : { [key: string]: number } = {}
-    const voteResults : { [key: string]: number } = {}
+    const plateNumbers: { [key: string]: number } = {}
+    const plateCountry: { [key: string]: number } = {}
+    const voteResults: { [key: string]: number } = {}
 
     let totalVotes = 0
     for (const vote of votes) {
@@ -106,6 +106,9 @@ const runTransitionVerification = async (report : Report, votes : ReportVote[]) 
 
     if (notSureVotes >= 4 && notSureVotes > totalVotes / 2) {
         report.status = STATUS.REJECTED
+        report.userAgent = "redacted"
+        report.ipAddress = "redacted"
+        report.deviceUUID = "redacted"
         await updateReport(report)
         console.log(`Report ${report._id} rejected`)
         return

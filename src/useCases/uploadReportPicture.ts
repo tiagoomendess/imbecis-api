@@ -10,11 +10,11 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
     const reportId = new ObjectId(request.reportId);
     const report = await getReportById(reportId);
     if (!report) {
-        throw new NotFoundError(`Report with the id ${request.reportId} was not found`);
+        throw new NotFoundError(`Denúncia com o id ${request.reportId} não foi encontrada`);
     }
 
     if (!request.file) {
-        throw new BadRequestError('Picture file was not in the request');
+        throw new BadRequestError('Fotografia não estava no pedido');
     }
 
     let buffer = null;
@@ -23,7 +23,7 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
         buffer = await resized.webp({ quality: 80 }).toBuffer()
     } catch (error) {
         console.error("Could not compress and convert image: ", error);
-        throw new InternalServerError("Could not compress and convert image");
+        throw new InternalServerError("Não foi possível comprimir a imagem");
     }
 
     const filePath = `pictures/reports/${request.reportId.toString()}_1.webp`
