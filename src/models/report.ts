@@ -8,6 +8,7 @@ export const STATUS = {
     REVIEW: 'review',
     REJECTED: 'rejected',
     CONFIRMED: 'confirmed',
+    CONFIRMED_BLUR_PLATES: 'confirmed_blur_plates',
 }
 
 export interface Report {
@@ -21,6 +22,7 @@ export interface Report {
     deviceUUID: string;
     ipAddress: string;
     userAgent: string;
+    platesBluredAt?: Date;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -172,6 +174,34 @@ export const getReportsByPlateId = async (plateId: ObjectId, page: number = 1): 
                 status: STATUS.CONFIRMED,
             } },
             { $sort: { updatedAt: -1 } },
+            { $skip: (page - 1) * 10 },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: 'plates',
+                    localField: 'plateId',
+                    foreignField: '_id',
+                    as: 'plate'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$plate',
+                    preserveNullAndEmptyArrays: true
+                }
+            }
+        ])
+        .toArray();
+
+    return reportsWithPlates;
+}
+
+export const getReportsByStatus = async (status: string, page: number = 1): Promise<Report[]> => {
+    const reportsWithPlates = await db
+        .collection<Report>(collection)
+        .aggregate<Report>([
+            { $match: { status: status } },
+            { $sort: { createdAt: 1 } },
             { $skip: (page - 1) * 10 },
             { $limit: 10 },
             {

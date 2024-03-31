@@ -93,7 +93,7 @@ const runTransitionVerification = async (report: Report, votes: ReportVote[]) =>
             if (plateNumbers[plateNumber] >= 3 && plateNumber != "") {
                 const plate = await getOrCreatePlate(plateNumber, mostVotedCountry)
                 report.plateId = plate._id
-                report.status = STATUS.CONFIRMED
+                report.status = STATUS.CONFIRMED_BLUR_PLATES
                 report.userAgent = "redacted"
                 report.ipAddress = "redacted"
                 report.deviceUUID = "redacted"

@@ -100,10 +100,31 @@ async function deleteObject(fileName : string, bucketName? : string) {
     }
 }
 
+async function downloadFile(fileName : string, bucketName? : string) {
+    // If no bucket name is provided, use the default bucket
+    if (!bucketName) {
+        bucketName = config.storage.s3.bucket
+    }
+
+    try {
+        const data = await S3.send(new GetObjectCommand({
+            Bucket: bucketName,
+            Key: fileName,
+            ResponseContentType: "application/octet-stream"
+
+        }));
+        return data.Body?.transformToByteArray();
+    } catch (err) {
+        console.error("Error downloading file: ", err);
+        throw err;
+    }
+}
+
 export default {
     listBuckets,
     listObjects,
     uploadFile,
     getDownloadUrl,
-    deleteObject
+    deleteObject,
+    downloadFile
 }
