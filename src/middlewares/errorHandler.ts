@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import BaseResponse from '../dtos/responses/baseResponse';
 import { NotFoundError, BadRequestError, UnauthorizedError, ForbiddenError } from '../errors';
+import Logger from '../utils/logger';
 
 const errorMiddleware = (err: any, req: Request, res: Response, next: NextFunction) => {
   let statusCode : number = 500
@@ -24,9 +25,9 @@ const errorMiddleware = (err: any, req: Request, res: Response, next: NextFuncti
 
   const message = err.message || 'Something went wrong';
   if (statusCode >= 500) {
-    console.error(`Error ${statusCode}: ${message}:`, err);
+    Logger.error(`Error ${statusCode}: ${message}: ${err}`);
   } else {
-    console.log(`Client Error ${statusCode}: ${message}:`, err);
+    Logger.info(`Client Error ${statusCode}: ${message}: ${err}`);
   }
 
   res.status(statusCode).send({

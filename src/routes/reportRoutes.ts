@@ -10,6 +10,8 @@ import { UploadReportPictureRequest } from '../dtos/requests/uploadReportPicture
 import { GetReportByIdRequest } from '../dtos/requests/getReportByIdRequest';
 import { GetFeedRequest } from '../dtos/requests/getFeedRequest';
 import { VoteRequest } from '../dtos/requests/voteRequest';
+import { UpdateReportPictureRequest } from '../dtos/requests/updateReportPictureRequest';
+import injectExtraData from '../middlewares/injectExtraData';
 
 import {
     createReport,
@@ -17,6 +19,7 @@ import {
     uploadPicture,
     getReportForReview,
     getFeed,
+    updatePicture,
     vote
 } from '../controllers/reportController';
 
@@ -39,6 +42,7 @@ const router = express.Router()
 // Create a new report
 router.post('/', validationMiddleware(CreateReportRequest), createReport)
 router.post('/:reportId([a-z0-9]{24})/upload-picture', upload.single('picture'), validationMiddleware(UploadReportPictureRequest), uploadPicture)
+router.post('/:reportId([a-z0-9]{24})/update-picture', upload.single('picture'), injectExtraData, validationMiddleware(UpdateReportPictureRequest), updatePicture)
 router.get('/for-review', validationMiddleware(GetReportForReviewRequest), getReportForReview)
 router.get('/:reportId([a-z0-9]{24})', validationMiddleware(GetReportByIdRequest), getReportById)
 router.get('/feed', validationMiddleware(GetFeedRequest), getFeed)

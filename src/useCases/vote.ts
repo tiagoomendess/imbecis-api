@@ -5,6 +5,7 @@ import { BadRequestError, InternalServerError } from "../errors";
 import { getReportById } from "../models/report";
 import { getReportVotesByReportId, ReportVote, createReportVote, RESULTS } from "../models/reportVote";
 import { ObjectId } from "mongodb"
+import Logger from "../utils/logger";
 
 export const voteUC = async (request: VoteRequest): Promise<boolean> => {
     const reportId = new ObjectId(request.reportId)
@@ -98,7 +99,7 @@ const runTransitionVerification = async (report: Report, votes: ReportVote[]) =>
                 report.ipAddress = "redacted"
                 report.deviceUUID = "redacted"
                 await updateReport(report)
-                console.log(`Report ${report._id} confirmed imbecile with plate ${mostVotedCountry} ${plateNumber}`)
+                Logger.info(`Report ${report._id} confirmed imbecile with plate ${mostVotedCountry} ${plateNumber}`)
                 return
             }
         }
@@ -110,7 +111,7 @@ const runTransitionVerification = async (report: Report, votes: ReportVote[]) =>
         report.ipAddress = "redacted"
         report.deviceUUID = "redacted"
         await updateReport(report)
-        console.log(`Report ${report._id} rejected`)
+        Logger.info(`Report ${report._id} rejected`)
         return
     }
 }

@@ -14,6 +14,10 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
         throw new NotFoundError(`Denúncia com o id ${request.reportId} não foi encontrada`);
     }
 
+    if (report.picture) {
+        throw new BadRequestError('Denúncia já tem uma fotografia associada');
+    }
+
     if (!request.file) {
         throw new BadRequestError('Fotografia não estava no pedido');
     }

@@ -1,5 +1,6 @@
 import { MongoClient } from 'mongodb';
 import config from '../config';
+import Logger from '../utils/logger';
 
 // MongoDB connection string
 const MONGO_URI = process.env.MONGO_URI || config.db.mongoUri;
@@ -10,8 +11,8 @@ const client = new MongoClient(MONGO_URI);
 
 // MongoDB connection
 client.connect().then(() => {
-  console.log('Connected to MongoDB');
-}).catch(err => console.log("Error connecting to mongodb: ", err));
+  Logger.info('Connected to MongoDB');
+}).catch(err => Logger.error(`Error connecting to mongodb: ${err}`));
 
 // Set Database
 const db = client.db(MONGO_DB);

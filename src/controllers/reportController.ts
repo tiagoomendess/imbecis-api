@@ -14,8 +14,10 @@ import { createReportUC } from "../useCases/createReport";
 import { getReportByIdUC } from "../useCases/getReportById";
 import { getFeedUC } from "../useCases/getFeed";
 import { voteUC } from "../useCases/vote";
+import { updateReportPictureUC } from "../useCases/updateReportPicture";
 
 import { BadRequestError } from "../errors";
+import { UpdateReportPictureRequest } from "../dtos/requests/updateReportPictureRequest";
 
 export const createReport = async (req: Request, res: Response, next: NextFunction) => {
     createReportUC(req.body as CreateReportRequest)
@@ -56,6 +58,25 @@ export const uploadPicture = async (req: Request, res: Response, next: NextFunct
         }
         
         await uploadReportPictureUC(req.body as UploadReportPictureRequest)
+
+        res.status(201).send({
+            success: true,
+            message: "Picture uploaded successfully",
+            payload: null,
+        } as BaseResponse);
+    } catch (error) {
+        return next(error);
+    }
+}
+
+export const updatePicture = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log('Body in controller: ', req.body)
+        if (!req.file) {
+            throw new BadRequestError('Fotografia não foi encontrada no pedido');
+        }
+
+        await updateReportPictureUC(req.body as UpdateReportPictureRequest)
 
         res.status(201).send({
             success: true,

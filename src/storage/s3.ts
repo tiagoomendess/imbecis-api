@@ -8,6 +8,7 @@ import {
 } from "@aws-sdk/client-s3";
 import config from "../config";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import Logger from "../utils/logger";
 
 const S3 = new S3Client({
     region: config.storage.s3.region,
@@ -95,7 +96,7 @@ async function deleteObject(fileName : string, bucketName? : string) {
         }));
         return data
     } catch (err) {
-        console.log("Error", err)
+        Logger.error(`Error deleting object: ${err}`)
         throw err
     }
 }
