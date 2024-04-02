@@ -71,7 +71,6 @@ export const uploadPicture = async (req: Request, res: Response, next: NextFunct
 
 export const updatePicture = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        console.log('Body in controller: ', req.body)
         if (!req.file) {
             throw new BadRequestError('Fotografia não foi encontrada no pedido');
         }
