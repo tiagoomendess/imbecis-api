@@ -20,7 +20,8 @@ const limiter = rateLimit({
     message: {
         success: false,
         message: "Muitos pedidos feitos num curto espaço de tempo, aguarda alguns segundos e tenta novamente."
-    }
+    },
+    validate: {xForwardedForHeader: false}
 })
 
 const corsOption = {
