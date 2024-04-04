@@ -64,7 +64,7 @@ async function uploadFile(fileName : string, fileContent : Buffer, contentType :
     }
 }
 
-async function getDownloadUrl(fileName : string, bucketName? : string) : Promise<string | null> {
+async function getDownloadUrlSigned(fileName : string, bucketName? : string) : Promise<string | null> {
     // If no bucket name is provided, use the default bucket
     if (!bucketName) {
         bucketName = config.storage.s3.bucket
@@ -81,6 +81,21 @@ async function getDownloadUrl(fileName : string, bucketName? : string) : Promise
         console.error("Error getting download URL: ", err)
         return null
     }
+}
+
+async function getPublicUrl(fileName : string, bucketName? : string) {
+    if (!bucketName) {
+        bucketName = config.storage.s3.bucket
+    }
+
+    let url = `https://${bucketName}.${config.storage.s3.endpoint}/${fileName}`
+    if (config.app.isDevelopment) {
+        url = `https://cdn-dev.imbecis.app/${fileName}`
+    } else {
+        url = `https://cdn.imbecis.app/${fileName}`
+    }
+
+    return url
 }
 
 async function deleteObject(fileName : string, bucketName? : string) {
@@ -125,7 +140,8 @@ export default {
     listBuckets,
     listObjects,
     uploadFile,
-    getDownloadUrl,
+    getDownloadUrlSigned,
+    getPublicUrl,
     deleteObject,
     downloadFile
 }

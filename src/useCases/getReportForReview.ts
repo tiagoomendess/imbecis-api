@@ -1,7 +1,6 @@
 import { GetReportForReviewRequest } from '../dtos/requests/getReportForReviewRequest'
 import { ReportDto, newReportDto } from '../dtos/responses/reportDto'
 import { getReportForReview, updateReport } from '../models/report'
-import { Coordinate } from '../models/coordinate'
 import s3 from '../storage/s3'
 
 export const getReportForReviewUC = async (request : GetReportForReviewRequest) : Promise<ReportDto | null> => {
@@ -15,7 +14,7 @@ export const getReportForReviewUC = async (request : GetReportForReviewRequest) 
 
     const dto = newReportDto(report)
     if (dto?.picture)
-        dto.picture = await s3.getDownloadUrl(dto.picture) ?? undefined
+        dto.picture = await s3.getPublicUrl(dto.picture) ?? undefined
     
     return dto
 }
