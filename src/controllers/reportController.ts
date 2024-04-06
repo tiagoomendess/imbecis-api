@@ -15,6 +15,7 @@ import { getReportByIdUC } from "../useCases/getReportById";
 import { getFeedUC } from "../useCases/getFeed";
 import { voteUC } from "../useCases/vote";
 import { updateReportPictureUC } from "../useCases/updateReportPicture";
+import { countAvailableReportsForReviewUC } from "../useCases/countAvailableReportsForReviewUC";
 
 import { BadRequestError } from "../errors";
 import { UpdateReportPictureRequest } from "../dtos/requests/updateReportPictureRequest";
@@ -56,7 +57,7 @@ export const uploadPicture = async (req: Request, res: Response, next: NextFunct
         if (!req.file) {
             throw new BadRequestError('Fotografia não foi encontrada no pedido');
         }
-        
+
         await uploadReportPictureUC(req.body as UploadReportPictureRequest)
 
         res.status(201).send({
@@ -123,6 +124,21 @@ export const vote = async (req: Request, res: Response, next: NextFunction) => {
             message: "Vote was registered",
             payload: {
                 voteRegistered: result
+            }
+        } as BaseResponse)
+    } catch (error) {
+        return next(error)
+    }
+}
+
+export const countAvailableReportsForReview = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await countAvailableReportsForReviewUC(req.body as GetReportForReviewRequest)
+        res.status(200).send({
+            success: true,
+            message: "Counted available reports for review",
+            payload: {
+                count: result
             }
         } as BaseResponse)
     } catch (error) {

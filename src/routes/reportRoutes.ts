@@ -20,7 +20,8 @@ import {
     getReportForReview,
     getFeed,
     updatePicture,
-    vote
+    vote,
+    countAvailableReportsForReview
 } from '../controllers/reportController';
 
 const upload = multer({
@@ -44,6 +45,7 @@ router.post('/', validationMiddleware(CreateReportRequest), createReport)
 router.post('/:reportId([a-z0-9]{24})/upload-picture', upload.single('picture'), validationMiddleware(UploadReportPictureRequest), uploadPicture)
 router.post('/:reportId([a-z0-9]{24})/update-picture', upload.single('picture'), injectExtraData, validationMiddleware(UpdateReportPictureRequest), updatePicture)
 router.get('/for-review', validationMiddleware(GetReportForReviewRequest), getReportForReview)
+router.get('/for-review/count', validationMiddleware(GetReportForReviewRequest), countAvailableReportsForReview)
 router.get('/:reportId([a-z0-9]{24})', validationMiddleware(GetReportByIdRequest), getReportById)
 router.get('/feed', validationMiddleware(GetFeedRequest), getFeed)
 router.post('/:reportId([a-z0-9]{24})/vote', validationMiddleware(VoteRequest), vote)

@@ -144,16 +144,39 @@ export const getReportForReview =
 
         return report;
     }
-/*
-export const getReportsForReviewCount = async (): Promise<number> => {
+
+export const countAvailableReportsForReview = async (ipAddress: string, deviceUUID: string, userAgent: string): Promise<number> => {
     // Count the number or possible reports
-    const count = await db
+    const results = await db
         .collection<Report>(collection)
-        .countDocuments({
-            status: STATUS.NEW
-        });
+        .aggregate([
+            {
+                $lookup: {
+                    from: "reportVotes",
+                    localField: "_id",
+                    foreignField: "reportId",
+                    as: "reportVotes"
+                }
+            },
+            {
+                $match: {
+                    "reportVotes.ipAddress": { $ne: ipAddress },
+                    "reportVotes.deviceUUID": { $ne: deviceUUID },
+                    "status": STATUS.REVIEW,
+                    "ipAddress": { $ne: ipAddress },
+                    "deviceUUID": { $ne: deviceUUID },
+                    "userAgent": { $ne: userAgent },
+                    "updatedAt": { $lt: new Date(Date.now() - (10 * 60 * 1000)) }
+                }
+            },
+            {
+                $count: 'count'
+            },
+        ]).toArray();
+
+        return results.length > 0 ? results[0].count : 0;
 };
-*/
+
 export const getConfirmedReports = async (page: number = 1): Promise<Report[]> => {
     const reportsWithPlates = await db
         .collection<Report>(collection)
