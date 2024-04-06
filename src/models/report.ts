@@ -107,7 +107,7 @@ export const getReportById =
 
 export const getReportForReview =
     async (ipAddress: string, deviceUUID: string, userAgent: string): Promise<Report | null> => {
-        const report = await db
+        const reports = await db
             .collection<Report>(collection)
             .aggregate<Report>([
                 {
@@ -126,7 +126,7 @@ export const getReportForReview =
                         "ipAddress": { $ne: ipAddress },
                         "deviceUUID": { $ne: deviceUUID },
                         "userAgent": { $ne: userAgent },
-                        "updatedAt": { $lt: new Date(Date.now() - (10 * 60 * 1000)) } // Change this later to 5 minutes
+                        "updatedAt": { $lt: new Date(Date.now() - (10 * 60 * 1000)) }
                     }
                 },
                 {
@@ -134,9 +134,26 @@ export const getReportForReview =
                 }
             ]).toArray();
 
-        return report[0] ?? null;
-    }
+        const report = reports[0] ?? null;
+        if (!report) {
+            return null;
+        }
 
+        // update updatedAT so it does not get served again soon
+        updateReport(report);
+
+        return report;
+    }
+/*
+export const getReportsForReviewCount = async (): Promise<number> => {
+    // Count the number or possible reports
+    const count = await db
+        .collection<Report>(collection)
+        .countDocuments({
+            status: STATUS.NEW
+        });
+};
+*/
 export const getConfirmedReports = async (page: number = 1): Promise<Report[]> => {
     const reportsWithPlates = await db
         .collection<Report>(collection)
@@ -169,10 +186,12 @@ export const getReportsByPlateId = async (plateId: ObjectId, page: number = 1): 
     const reportsWithPlates = await db
         .collection<Report>(collection)
         .aggregate<Report>([
-            { $match: { 
-                plateId : plateId,
-                status: STATUS.CONFIRMED,
-            } },
+            {
+                $match: {
+                    plateId: plateId,
+                    status: STATUS.CONFIRMED,
+                }
+            },
             { $sort: { updatedAt: -1 } },
             { $skip: (page - 1) * 10 },
             { $limit: 10 },

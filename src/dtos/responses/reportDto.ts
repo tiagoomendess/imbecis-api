@@ -7,6 +7,7 @@ export interface ReportDto {
     deviceUUID: string
     municipality?: string
     picture?: string
+    pictureSignedUrl?: string
     plateId?: string
     plate?: PlateDto
     createdAt: Date

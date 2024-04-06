@@ -14,7 +14,9 @@ export const getReportByIdUC = async (request: GetReportByIdRequest): Promise<Re
     }
     
     if (dto.picture) {
-        dto.picture = await s3.getPublicUrl(dto.picture) ?? undefined
+        const rawPath = dto.picture
+        dto.picture = await s3.getPublicUrl(rawPath) ?? undefined
+        dto.pictureSignedUrl = await s3.getDownloadUrlSigned(rawPath) ?? undefined
     }
 
     return dto
