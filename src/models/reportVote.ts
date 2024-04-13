@@ -57,3 +57,14 @@ export const getReportVotesByReportId =
             .find({ reportId })
         return reportVotes?.toArray() ?? []
     };
+
+export const getReportVotesByUuidOrIP = 
+    async (deviceUUID: string, ipAddress : string, page : number = 1): Promise<ReportVote[]> => {
+        const reportVotes = await db
+            .collection<ReportVote>(collection)
+            .find({ $or: [{ deviceUUID }, { ipAddress }] })
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * 10)
+            .limit(10)
+        return reportVotes?.toArray() ?? []
+    }

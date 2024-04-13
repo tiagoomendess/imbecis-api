@@ -39,9 +39,15 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
     const filename = `${uuidv4()}.webp`
     const filePath = `pictures/reports/${filename}`
 
+    // Save the original picture in case we need to revert
+    const filenameBackup = `${uuidv4()}.webp`
+    const filePathBackup = `pictures/reports/${filenameBackup}`
+
     try {
         await s3.uploadFile(filePath, buffer, 'image/webp')
+        await s3.uploadFile(filePathBackup, buffer, 'image/webp')
         report.picture = filePath
+        report.originalPicture = filePathBackup
         report.status = STATUS.REVIEW
         await updateReport(report)
     } catch (error) {

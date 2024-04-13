@@ -23,6 +23,7 @@ export interface Report {
     ipAddress: string;
     userAgent: string;
     platesBluredAt?: Date;
+    originalPicture?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -125,7 +126,6 @@ export const getReportForReview =
                         "status": STATUS.REVIEW,
                         "ipAddress": { $ne: ipAddress },
                         "deviceUUID": { $ne: deviceUUID },
-                        "userAgent": { $ne: userAgent },
                         "updatedAt": { $lt: new Date(Date.now() - (10 * 60 * 1000)) } // 10 minutes
                     }
                 },
@@ -165,7 +165,6 @@ export const countAvailableReportsForReview = async (ipAddress: string, deviceUU
                     "status": STATUS.REVIEW,
                     "ipAddress": { $ne: ipAddress },
                     "deviceUUID": { $ne: deviceUUID },
-                    "userAgent": { $ne: userAgent },
                     "updatedAt": { $lt: new Date(Date.now() - (10 * 60 * 1000)) }
                 }
             },
@@ -244,6 +243,41 @@ export const getReportsByStatus = async (status: string, page: number = 1): Prom
         .aggregate<Report>([
             { $match: { status: status } },
             { $sort: { createdAt: 1 } },
+            { $skip: (page - 1) * 10 },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: 'plates',
+                    localField: 'plateId',
+                    foreignField: '_id',
+                    as: 'plate'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$plate',
+                    preserveNullAndEmptyArrays: true
+                }
+            }
+        ])
+        .toArray();
+
+    return reportsWithPlates;
+}
+
+export const getReportsByUuidOrIp = async (deviceUUID: string, ipAddress : string, page: number = 1): Promise<Report[]> => {
+    const reportsWithPlates = await db
+        .collection<Report>(collection)
+        .aggregate<Report>([
+            {
+                $match: {
+                    $or: [
+                        { deviceUUID: deviceUUID },
+                        { ipAddress: ipAddress }
+                    ]
+                }
+            },
+            { $sort: { createdAt: -1 } },
             { $skip: (page - 1) * 10 },
             { $limit: 10 },
             {

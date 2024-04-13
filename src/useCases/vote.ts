@@ -3,7 +3,7 @@ import { Report, updateReport, STATUS } from "../models/report";
 import { getOrCreatePlate } from "../models/plate";
 import { BadRequestError, InternalServerError } from "../errors";
 import { getReportById } from "../models/report";
-import { getReportVotesByReportId, ReportVote, createReportVote, RESULTS } from "../models/reportVote";
+import { getReportVotesByReportId, ReportVote, createReportVote, RESULTS, getReportVotesByUuidOrIP } from "../models/reportVote";
 import { ObjectId } from "mongodb"
 import Logger from "../utils/logger";
 
@@ -11,18 +11,25 @@ export const voteUC = async (request: VoteRequest): Promise<boolean> => {
     const reportId = new ObjectId(request.reportId)
     const getReportPromise = getReportById(reportId)
     const getCurrentVotesPromise = getReportVotesByReportId(reportId)
-    const result = await Promise.all([getReportPromise, getCurrentVotesPromise])
+    const shouldBeBlockedPromise = shouldBeBlocked(request)
+    const result = await Promise.all([getReportPromise, getCurrentVotesPromise, shouldBeBlockedPromise])
     const report = result[0]
     const currentVotes = result[1]
+    const shouldBlock = result[2]
 
     if (!report)
         throw new BadRequestError(`Denúncia com o id ${request.reportId} não foi encontrada`)
+
+    if (shouldBlock) {
+        console.warn(`Vote throttled UUID ${report.deviceUUID}, IP ${report.ipAddress}, might be spam`)
+        throw new BadRequestError('Voto bloqueado por suspeitas de fraude')
+    }
 
     for (const currentVote of currentVotes) {
         // If it's too similar, don't allow it
         if (currentVote.deviceUUID === request.deviceUUID || currentVote.ipAddress === request.ipAddress) {
             console.warn(`Vote too similar to a previous vote ${report.plate?.number}`)
-            throw new BadRequestError('Possível voto duplicado')
+            throw new BadRequestError('Possível voto duplicado, ignorado')
         }
     }
 
@@ -114,4 +121,39 @@ const runTransitionVerification = async (report: Report, votes: ReportVote[]) =>
         Logger.info(`Report ${report._id} rejected`)
         return
     }
+}
+
+const shouldBeBlocked = async (request: VoteRequest): Promise<boolean> => {
+    const lastUserVotes = await getReportVotesByUuidOrIP(request.deviceUUID, request.ipAddress, 1)
+
+    // Handle not sure spam
+    if (request.result === RESULTS.NOT_SURE) {
+        let notSureCount = 0
+        for (const vote of lastUserVotes) {
+            if (vote.result === RESULTS.NOT_SURE)
+                notSureCount++
+            else
+                return false
+        }
+
+        return notSureCount >= 3
+    }
+
+    // handle same plate spam
+    if (request.result == RESULTS.IMBECILE) {
+        const requestPlateKey = `${request.plateCountry}_${request.plateNumber}`
+
+        for (const vote of lastUserVotes) {
+            if (vote.result === RESULTS.IMBECILE) {
+                let plateKey = `${vote.plateCountry}_${vote.plateNumber}`
+                if (plateKey === requestPlateKey)
+                    return true
+            }
+        }
+
+        return false
+    }
+
+    // unknow result type
+    return false
 }
