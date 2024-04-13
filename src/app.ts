@@ -32,6 +32,8 @@ const corsOptions = {
 };
 
 const app = express()
+app.set('trust proxy', 1)
+
 app.use(helmet())
 app.use(limiter)
 app.use(express.urlencoded({ extended: false }))
