@@ -12,35 +12,31 @@ import userRoutes from './routes/userRoutes'
 import reportRoutes from './routes/reportRoutes'
 import plateRoutes from './routes/plateRoutes'
 
+import helmet from 'helmet'
+
 const limiter = rateLimit({
     windowMs: 10 * 1000,
-    max: 20,
+    max: 15,
     standardHeaders: 'draft-7',
-	legacyHeaders: false,
+    legacyHeaders: false,
     message: {
         success: false,
         message: "Muitos pedidos feitos num curto espaço de tempo, aguarda alguns segundos e tenta novamente."
-    },
-    validate: {xForwardedForHeader: false}
+    }
 })
 
-const corsOption = {
-    origin: "*",
-    credentials: true,
+const corsOptions = {
+    origin: config.app.isDevelopment ? "*" : "https://imbecis.app",
+    credentials: !config.app.isDevelopment,
+    exposedHeaders: ['csrf-token'],
 };
 
-if (config.app.isDevelopment) {
-    corsOption.origin = "*"
-    corsOption.credentials = false
-} else {
-    corsOption.origin = "https://imbecis.app"
-}
-
 const app = express()
+app.use(helmet())
 app.use(limiter)
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
-app.use(cors(corsOption))
+app.use(cors(corsOptions))
 app.use(injectExtraData)
 app.use(requestLoggerMiddleware)
 

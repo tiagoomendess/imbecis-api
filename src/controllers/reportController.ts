@@ -20,9 +20,13 @@ import { countAvailableReportsForReviewUC } from "../useCases/countAvailableRepo
 import { BadRequestError } from "../errors";
 import { UpdateReportPictureRequest } from "../dtos/requests/updateReportPictureRequest";
 
+import { generateCSRFToken } from "../services/csrf";
+
 export const createReport = async (req: Request, res: Response, next: NextFunction) => {
-    createReportUC(req.body as CreateReportRequest)
+    const request = req.body as CreateReportRequest
+    createReportUC(request)
         .then((result) => {
+            res.header('csrf-token', generateCSRFToken(request.deviceUUID))
             res.status(201).send({
                 success: true,
                 message: "Report created successfully",
@@ -90,7 +94,13 @@ export const updatePicture = async (req: Request, res: Response, next: NextFunct
 
 export const getReportForReview = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const result = await getReportForReviewUC(req.body as GetReportForReviewRequest)
+        const request = req.body as GetReportForReviewRequest
+        const result = await getReportForReviewUC(request)
+
+        if (result) {
+            const token = generateCSRFToken(request.deviceUUID)
+            res.header('csrf-token', token)
+        }
 
         res.status(200).send({
             success: true,

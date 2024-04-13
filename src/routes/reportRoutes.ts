@@ -2,6 +2,7 @@ import express from 'express'
 import multer from 'multer';
 
 import validationMiddleware from '../middlewares/validate';
+import { csrf } from '../middlewares/csrf';
 import { BadRequestError } from '../errors';
 
 import { CreateReportRequest } from '../dtos/requests/createReportRequest';
@@ -42,12 +43,15 @@ const router = express.Router()
 
 // Create a new report
 router.post('/', validationMiddleware(CreateReportRequest), createReport)
-router.post('/:reportId([a-z0-9]{24})/upload-picture', upload.single('picture'), validationMiddleware(UploadReportPictureRequest), uploadPicture)
+
+// TODO: Remove injectExtraData from these two, should not be necessary, the upload middleware is the one braking things
+router.post('/:reportId([a-z0-9]{24})/upload-picture', upload.single('picture'), injectExtraData, validationMiddleware(UploadReportPictureRequest), csrf, uploadPicture)
 router.post('/:reportId([a-z0-9]{24})/update-picture', upload.single('picture'), injectExtraData, validationMiddleware(UpdateReportPictureRequest), updatePicture)
+
 router.get('/for-review', validationMiddleware(GetReportForReviewRequest), getReportForReview)
 router.get('/for-review/count', validationMiddleware(GetReportForReviewRequest), countAvailableReportsForReview)
 router.get('/:reportId([a-z0-9]{24})', validationMiddleware(GetReportByIdRequest), getReportById)
 router.get('/feed', validationMiddleware(GetFeedRequest), getFeed)
-router.post('/:reportId([a-z0-9]{24})/vote', validationMiddleware(VoteRequest), vote)
+router.post('/:reportId([a-z0-9]{24})/vote', validationMiddleware(VoteRequest), csrf, vote)
 
 export default router;

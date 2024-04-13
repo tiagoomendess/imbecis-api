@@ -22,6 +22,10 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
         throw new BadRequestError('Fotografia não estava no pedido');
     }
 
+    if (request.deviceUUID !== report.deviceUUID) {
+        throw new BadRequestError('O dispositivo que iniciou a denúncia é diferente do que está a tentar fazer o upload da fotografia');
+    }
+
     let buffer = null;
     try {
         const resized = await sharp(request.file.buffer).resize(1000, 1000)

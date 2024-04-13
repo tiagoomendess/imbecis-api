@@ -89,7 +89,7 @@ const runTransitionVerification = async (report: Report, votes: ReportVote[]) =>
     const notSureVotes = voteResults[RESULTS.NOT_SURE] ?? 0
 
     // If there are 3 or more cotes with result = imbecile and all the votes agree on the same plate number, confirm the report
-    if (imbecileVotes >= 4 && imbecileVotes > totalVotes / 2) {
+    if (imbecileVotes >= 3 && imbecileVotes > totalVotes / 2) {
         for (const plateNumber in plateNumbers) {
             if (plateNumbers[plateNumber] >= 3 && plateNumber != "") {
                 const plate = await getOrCreatePlate(plateNumber, mostVotedCountry)
