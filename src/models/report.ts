@@ -176,12 +176,23 @@ export const countAvailableReportsForReview = async (ipAddress: string, deviceUU
         return results.length > 0 ? results[0].count : 0;
 };
 
-export const getConfirmedReports = async (page: number = 1): Promise<Report[]> => {
+export const getConfirmedReports = async (page: number = 1, municipality : string = ""): Promise<Report[]> => {
+    const matchCondition: any = {
+        status: STATUS.CONFIRMED
+    };
+
+    // Conditionally add municipality to the match condition if it is not an empty string
+    if (municipality !== "") {
+        matchCondition.municipality = municipality;
+    } else {
+        matchCondition.municipality = { $exists: true };
+    }
+
     const reportsWithPlates = await db
         .collection<Report>(collection)
         .aggregate<Report>([
-            { $match: { status: STATUS.CONFIRMED, municipality: { $exists: true } } },
-            { $sort: { updatedAt: -1 } },
+            { $match: matchCondition },
+            { $sort: { platesBluredAt: -1, createdAt: -1 } },
             { $skip: (page - 1) * 10 },
             { $limit: 10 },
             {
