@@ -27,10 +27,18 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
     }
 
     let buffer = null;
+    let bufferBackup = null;
     try {
         const resized = await sharp(request.file.buffer).resize(1000, 1000)
         // 100% quality here because it will be compressed in the blur plates cron job
-        buffer = await resized.webp({ quality: 100 }).toBuffer()
+        const promises = await Promise.all([
+            resized.webp({ quality: 100 }).toBuffer(),
+            resized.webp({ quality: 80 }).toBuffer()
+        ])
+
+        buffer = promises[0]
+        bufferBackup = promises[1]
+
     } catch (error) {
         console.error("Could not compress and convert image: ", error);
         throw new InternalServerError("Não foi possível comprimir a imagem");
@@ -45,7 +53,7 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
 
     try {
         await s3.uploadFile(filePath, buffer, 'image/webp')
-        await s3.uploadFile(filePathBackup, buffer, 'image/webp')
+        await s3.uploadFile(filePathBackup, bufferBackup, 'image/webp')
         report.picture = filePath
         report.originalPicture = filePathBackup
         report.status = STATUS.REVIEW
