@@ -1,10 +1,13 @@
 import dotenv from "dotenv";
+import { url } from "inspector";
+import { features } from "process";
 
 dotenv.config();
 
 const AppConfig = {
     app: {
       name: process.env.APP_NAME || "",
+      url: process.env.APP_URL || "https://imbecis.app",
       server: process.env.SERVER,
       isDevelopment: ["development", "dev", "local"].includes(
         <string>process.env.SERVER
@@ -26,6 +29,16 @@ const AppConfig = {
         region: <string>process.env.S3_REGION || "",
       }
     },
+    reddit: {
+      clientId: <string>process.env.REDDIT_CLIENT_ID || "",
+      clientSecret: <string>process.env.REDDIT_CLIENT_SECRET || "",
+      username: <string>process.env.REDDIT_USERNAME || "",
+      password: <string>process.env.REDDIT_PASSWORD || "",
+    },
+    features: {
+      email_notification: process.env.FEATURE_EMAIL_NOTIFICATION === "true",
+      reddit_notification: process.env.FEATURE_REDDIT_NOTIFICATION === "true",
+    }
   };
   
   export default Object.freeze(AppConfig);

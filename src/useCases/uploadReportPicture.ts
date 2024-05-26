@@ -27,17 +27,9 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
     }
 
     let buffer = null;
-    let bufferBackup = null;
     try {
         const resized = await sharp(request.file.buffer).resize(1000, 1000)
-        // 100% quality here because it will be compressed in the blur plates cron job
-        const promises = await Promise.all([
-            resized.webp({ quality: 100 }).toBuffer(),
-            resized.webp({ quality: 80 }).toBuffer()
-        ])
-
-        buffer = promises[0]
-        bufferBackup = promises[1]
+        buffer = await resized.webp({ quality: 100 }).toBuffer()
 
     } catch (error) {
         console.error("Could not compress and convert image: ", error);
@@ -48,12 +40,18 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
     const filePath = `pictures/reports/${filename}`
 
     // Save the original picture in case we need to revert
-    const filenameBackup = `${uuidv4()}.webp`
+    const extension = request.file.mimetype.split('/')[1]
+    const filenameBackup = `${uuidv4()}.${extension}`
     const filePathBackup = `pictures/reports/${filenameBackup}`
 
+    console.log("asdasda -> ", request.file.mimetype)
+
     try {
-        await s3.uploadFile(filePath, buffer, 'image/webp')
-        await s3.uploadFile(filePathBackup, bufferBackup, 'image/webp')
+        await Promise.all([
+            s3.uploadFile(filePath, buffer, 'image/webp'),
+            s3.uploadFile(filePathBackup, request.file.buffer, request.file.mimetype)
+        ])
+        
         report.picture = filePath
         report.originalPicture = filePathBackup
         report.status = STATUS.REVIEW

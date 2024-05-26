@@ -7,8 +7,17 @@ export const STATUS = {
     NEW: 'new',
     REVIEW: 'review',
     REJECTED: 'rejected',
-    CONFIRMED: 'confirmed',
-    CONFIRMED_BLUR_PLATES: 'confirmed_blur_plates',
+    NOTIFY: 'notify', // This state will notify whatever is configured
+    CONFIRMED_BLUR_PLATES: 'confirmed_blur_plates', // This state will blur the plates
+    CONFIRMED: 'confirmed', // This state make the report public
+}
+
+export interface ReporterInfo {
+    name: string;
+    email: string;
+    idNumber: string;
+    idType: string;
+    obs: string | undefined;
 }
 
 export interface Report {
@@ -24,6 +33,8 @@ export interface Report {
     userAgent: string;
     platesBluredAt?: Date;
     originalPicture?: string;
+    imageHash?: string;
+    reporterInfo?: ReporterInfo;
     createdAt: Date;
     updatedAt: Date;
 }

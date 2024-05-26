@@ -11,6 +11,7 @@ import indexRoutes from './routes/indexRoutes'
 import userRoutes from './routes/userRoutes'
 import reportRoutes from './routes/reportRoutes'
 import plateRoutes from './routes/plateRoutes'
+import regionRoutes from './routes/regionsRoutes'
 
 import helmet from 'helmet'
 
@@ -47,6 +48,7 @@ app.use('/', indexRoutes)
 app.use('/users', userRoutes)
 app.use('/reports', reportRoutes)
 app.use('/plates', plateRoutes)
+app.use('/regions', regionRoutes)
 
 app.use(errorMiddleware)
 

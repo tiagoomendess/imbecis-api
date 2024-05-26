@@ -101,7 +101,7 @@ const runTransitionVerification = async (report: Report, votes: ReportVote[]) =>
             if (plateNumbers[plateNumber] >= 3 && plateNumber != "") {
                 const plate = await getOrCreatePlate(plateNumber, mostVotedCountry)
                 report.plateId = plate._id
-                report.status = STATUS.CONFIRMED_BLUR_PLATES
+                report.status = STATUS.NOTIFY
                 report.userAgent = "redacted"
                 report.ipAddress = "redacted"
                 report.deviceUUID = "redacted"
@@ -112,7 +112,7 @@ const runTransitionVerification = async (report: Report, votes: ReportVote[]) =>
         }
     }
 
-    if (notSureVotes >= 8 && notSureVotes > totalVotes / 1.8) {
+    if (notSureVotes >= 5 && notSureVotes > totalVotes / 1.8) {
         report.status = STATUS.REJECTED
         report.userAgent = "redacted"
         report.ipAddress = "redacted"

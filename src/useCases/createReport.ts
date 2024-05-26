@@ -22,6 +22,8 @@ export const createReportUC = async (request : CreateReportRequest) : Promise<Re
         ipAddress: request.ipAddress,
         userAgent: request.userAgent,
         status: STATUS.NEW,
+        reporterInfo: request.reporterInfo,
+        imageHash: request.imageHash
     } as Report)
 
     if (!result) {
