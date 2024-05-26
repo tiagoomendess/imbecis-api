@@ -71,7 +71,9 @@ const handleRegions = async (report: Report, regions: NotificationRegion[]): Pro
 }
 
 const getReportPublicUrl = (report: Report) => {
-    return `${config.app.url}/${report.plate?.number}`;
+    let countryCode =  report.plate?.country || 'unknown'
+
+    return `${config.app.url}/matriculas/${countryCode}/${report.plate?.number}`;
 }
 
 const handleRedditNotification = async (region : NotificationRegion, report: Report, subreddit: string) => {
@@ -85,8 +87,10 @@ const handleRedditNotification = async (region : NotificationRegion, report: Rep
     try {
         // wait 1 second to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const date = new Date(report.createdAt).toLocaleDateString('pt-PT');
         await postUrl(
-            `${report.plate?.number} em ${report.municipality}`,
+            `${report.plate?.number} em ${report.municipality} no dia ${date}`,
             getReportPublicUrl(report),
             subreddit
         );
