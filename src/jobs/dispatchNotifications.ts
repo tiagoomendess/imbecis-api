@@ -22,14 +22,14 @@ export const dispatchNotifications = async () => {
 const doDispatchNotifications = async () => {
     // Get all the reports that are in the notify status
     const reports = await getReportsByStatus(STATUS.NOTIFY, 1);
+    Logger.info(`Found ${reports.length} reports to dispatch notifications`);
 
     // For each report find the region it's coordinates are in
     for (const report of reports) {
         report.status = STATUS.CONFIRMED_BLUR_PLATES;
         const regions = await findRegionsByPoint(report.location);
-
+        Logger.info(`Found ${regions.length} regions for report ${report._id}`);
         if (regions.length === 0) {
-            Logger.warn(`No regions found for report ${report._id}`);
             report.reporterInfo = undefined;
             await updateReport(report);
             continue;
@@ -83,6 +83,8 @@ const handleRedditNotification = async (region : NotificationRegion, report: Rep
     let success = true;
     let errorMessage = '';
     try {
+        // wait 1 second to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
         await postUrl(
             `${report.plate?.number} em ${report.municipality}`,
             getReportPublicUrl(report),
@@ -109,6 +111,6 @@ const handleEmailNotification = async (region : NotificationRegion, report: Repo
         Logger.info(`Email notification disabled`);
         return
     }
-    
+
     const success = await sendEmail(email, `subject`, `body`);
 }
