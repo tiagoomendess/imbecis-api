@@ -17,7 +17,7 @@ export const createRegionUC = async (request: CreateRegionRequest): Promise<Noti
 
     const adminAccount = await getByUuidAndIp(request.deviceUUID, request.ipAddress)
     if (!adminAccount) {
-        throw new BadRequestError('Não tem permissão para editar esta fotografia');
+        throw new BadRequestError('Não tem permissão para criar regiões');
     }
 
     const newRegion = await createRegion({

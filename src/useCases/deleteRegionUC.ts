@@ -16,7 +16,7 @@ export const deleteRegionUC = async (request: DeleteRegionRequest): Promise<bool
 
     const adminAccount = await getByUuidAndIp(request.deviceUUID, request.ipAddress)
     if (!adminAccount) {
-        throw new BadRequestError('Não tem permissão para editar esta fotografia');
+        throw new BadRequestError('Não tem permissão para apagar regiões');
     }
 
     const objectId = new ObjectId(request.id)

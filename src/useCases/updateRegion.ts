@@ -18,7 +18,7 @@ export const updateRegionUC = async (request: UpdateRegionRequest): Promise<Noti
 
     const adminAccount = await getByUuidAndIp(request.deviceUUID, request.ipAddress)
     if (!adminAccount) {
-        throw new BadRequestError('Não tem permissão para editar esta fotografia');
+        throw new BadRequestError('Não tem permissão para alterar regiões');
     }
 
     const objectId = new ObjectId(request.id)

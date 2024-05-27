@@ -44,8 +44,6 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
     const filenameBackup = `${uuidv4()}.${extension}`
     const filePathBackup = `pictures/reports/${filenameBackup}`
 
-    console.log("asdasda -> ", request.file.mimetype)
-
     try {
         await Promise.all([
             s3.uploadFile(filePath, buffer, 'image/webp'),
