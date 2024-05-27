@@ -38,8 +38,8 @@ export const createReportUC = async (request : CreateReportRequest) : Promise<Re
 const shouldBeBlocked = async (request: CreateReportRequest): Promise<boolean> => {
     const now = new Date()
     const lastReports = await getReportsByUuidOrIp(request.deviceUUID, request.ipAddress, 1)
-    const lastMinuteReports = lastReports.filter(r => now.getTime() - r.createdAt.getTime() < 60000)
-    const lastMinuteInNewCount = lastMinuteReports.filter(r => r.status === STATUS.NEW).length
+    const lastMinuteReports = lastReports.filter(r => now.getTime() - r.createdAt.getTime() < 30000)
+    const lastMinuteInNewCount = lastMinuteReports.filter(r => r.status === STATUS.NEW && now.getTime() - r.createdAt.getTime() < 30000).length
 
     return lastMinuteInNewCount >= 1 || lastMinuteReports.length >= 6
 }
