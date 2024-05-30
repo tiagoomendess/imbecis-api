@@ -90,7 +90,7 @@ const handleRedditNotification = async (region : NotificationRegion, report: Rep
 
         const date = new Date(report.createdAt).toLocaleDateString('pt-PT');
         await postUrl(
-            `${report.plate?.number} em ${report.municipality} no dia ${date}`,
+            `${report.plate?.number} estacionou abusivamente em ${report.municipality} no dia ${date}`,
             getReportPublicUrl(report),
             subreddit
         );
