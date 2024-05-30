@@ -17,7 +17,7 @@ import helmet from 'helmet'
 
 const limiter = rateLimit({
     windowMs: 10 * 1000,
-    max: 15,
+    max: 20,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     message: {

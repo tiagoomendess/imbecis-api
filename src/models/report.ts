@@ -233,7 +233,7 @@ export const getReportsByPlateId = async (plateId: ObjectId, page: number = 1): 
             {
                 $match: {
                     plateId: plateId,
-                    status: STATUS.CONFIRMED,
+                    status: { $in: [STATUS.CONFIRMED, STATUS.NOTIFY]},
                 }
             },
             { $sort: { updatedAt: -1 } },
