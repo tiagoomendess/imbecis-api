@@ -14,6 +14,8 @@ const AppConfig = {
       ),
       port: parseInt(<string>process.env.PORT, 10) || 3000,
       secret: process.env.SECRET || "",
+      reportsEmail: process.env.REPORTS_EMAIL || "denuncias@imbecis.app",
+      reportsEmailName: process.env.REPORTS_EMAIL_NAME || "Denúncias de Estacionamento",
     },
     db: {
       mongoUri: <string>process.env.MONGO_URI || "",
@@ -34,6 +36,11 @@ const AppConfig = {
       clientSecret: <string>process.env.REDDIT_CLIENT_SECRET || "",
       username: <string>process.env.REDDIT_USERNAME || "",
       password: <string>process.env.REDDIT_PASSWORD || "",
+    },
+    mailjet: {
+      apiKeyPublic: <string>process.env.MJ_APIKEY_PUBLIC || "",
+      apiKeyPrivate: <string>process.env.MJ_APIKEY_PRIVATE || "",
+      apiToken: <string>process.env.MJ_API_TOKEN || "",
     },
     features: {
       email_notification: process.env.FEATURE_EMAIL_NOTIFICATION === "true",
