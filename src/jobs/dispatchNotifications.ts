@@ -176,7 +176,7 @@ const buildBody = (report: Report): string => {
     (<a href="${getGoogleMapsLink(report)}">Link Google Maps</a>)</p>`
 
     message += `<p>A fotografia, que foi tirada através da aplicação de denúncias, e que comprova a infração, pode ser pré visualizada abaixo:</p>`
-    message += `<img src="${getImageUrl(report)}" alt="Fotografia da viatura" style="width: 100%; height: auto;"/>`
+    message += `<img src="${getImageUrl(report)}" alt="Fotografia da viatura" style="max-width: 100%;"/>`
     message += `<p>A seguinte hash criptográfica, gerada no momento e local da infração, ainda no dispositivo do denunciante, e a partir da fotografia reproduzida, 
     prova que a imagem não foi adulterada enquanto armazenada ou em trânsito. Hash SHA256: ${report.imageHash}. A imagem original está disponível 
     <a href="${getImageUrl(report)}">aqui</a>, e a hash pode ser validada através de qualquer ferramenta online, como por exemplo 
@@ -188,7 +188,7 @@ const buildBody = (report: Report): string => {
     por denúncia de contra-ordenação, levanta auto, não carecendo de presenciar tal contra-ordenação rodoviária, situação a que se 
     aplica o n.º 1 do mesmo artigo.</p>`
 
-    message += `<p>Para quaisquer esclarecimentos não hesite em entrar em contacto.</p>`
+    message += `<p>Para quaisquer esclarecimentos não hesitem em entrar em contacto.</p>`
     message += `<p>Sem mais de momento,<br/>Continuação de um bom dia.</p>`
 
     message += `<small style="opacity: 75%">Esta denúncia foi validada e confirmada por, pelo menos, 3 pessoas diferentes para além do denunciante antes de 
@@ -206,9 +206,8 @@ const getAddress = (locationFullInfo: GeoInfo): string => {
     let postalCode = locationFullInfo.CP ? `, ${locationFullInfo.CP}` : '';
     let freguesia = locationFullInfo.freguesia ? `, ${locationFullInfo.freguesia}` : '';
     let municipality = locationFullInfo.concelho ? `, ${locationFullInfo.concelho}` : '';
-    let district = locationFullInfo.distrito ? `, ${locationFullInfo.distrito}` : '';
 
-    return `${street}${number}${postalCode}${freguesia}${municipality}${district}`
+    return `${street}${number}${postalCode}${freguesia}${municipality}`
 }
 
 const tryGetFullInfoByCoords = async (latitude: number, longitude: number): Promise<GeoApiPTResponse | null> => {
