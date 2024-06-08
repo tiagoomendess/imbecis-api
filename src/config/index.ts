@@ -17,6 +17,9 @@ const AppConfig = {
       reportsEmail: process.env.REPORTS_EMAIL || "denuncias@imbecis.app",
       reportsEmailName: process.env.REPORTS_EMAIL_NAME || "Denúncias de Estacionamento",
     },
+    geoApiPT: {
+      key: <string>process.env.GEO_API_PT_KEY || "abcdef12345",
+    },
     db: {
       mongoUri: <string>process.env.MONGO_URI || "",
       mongoDb: <string>process.env.MONGO_DB || "",
