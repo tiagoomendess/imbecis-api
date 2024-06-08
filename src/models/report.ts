@@ -5,6 +5,7 @@ import type { Plate } from './plate';
 
 export const STATUS = {
     NEW: 'new',
+    FILL_GEO_INFO: 'fill_geo_info',
     REVIEW: 'review',
     REJECTED: 'rejected',
     NOTIFY: 'notify', // This state will notify whatever is configured
@@ -18,6 +19,20 @@ export interface ReporterInfo {
     idNumber: string;
     idType: string;
     obs: string | undefined;
+}
+
+export interface GeoInfo {
+    lon: number
+    lat: number
+    distrito: string
+    concelho: string
+    freguesia: string
+    uso: string
+    SEC: number
+    SS: number
+    rua: string
+    n_porta: number
+    CP: string
 }
 
 export interface Report {
@@ -35,6 +50,7 @@ export interface Report {
     originalPicture?: string;
     imageHash?: string;
     reporterInfo?: ReporterInfo;
+    geoInfo?: GeoInfo;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -320,4 +336,17 @@ export const getReportsByUuidOrIp = async (deviceUUID: string, ipAddress : strin
         .toArray();
 
     return reportsWithPlates;
+}
+
+export const getReportsToFillGeoInfo = async (page: number = 1): Promise<Report[]> => {
+    const reports = await db
+        .collection<Report>(collection)
+        .aggregate<Report>([
+            { $match: { status: STATUS.FILL_GEO_INFO } },
+            { $sort: { createdAt: 1 } },
+            { $skip: (page - 1) * 10 },
+            { $limit: 10 }
+        ]).toArray();
+
+    return reports;
 }

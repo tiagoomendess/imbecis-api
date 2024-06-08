@@ -6,7 +6,7 @@ import axios from 'axios';
 import sharp from 'sharp';
 
 export const blurPlatesAfterConfirm = async () => {
-    Logger.info("Starting blurPlatesAfterConfirm job")
+    Logger.info("=== Starting blurPlatesAfterConfirm job ====================")
 
     const reports = await getReportsByStatus(STATUS.CONFIRMED_BLUR_PLATES, 1)
     Logger.info(`Found ${reports.length} reports to blur plates`)
@@ -76,7 +76,8 @@ export const blurPlatesAfterConfirm = async () => {
         successful++
     }
 
-    Logger.info(`Finished blurPlatesAfterConfirm job, ${alreadyBlured} were already blured, ${failed} failed, and ${successful} were successfully blured`)
+    Logger.info(`Plates Blur: ${alreadyBlured} were already blured, ${failed} failed, and ${successful} were successfully blured`)
+    Logger.info(`=== Finished blurPlatesAfterConfirm ====================`)
 }
 
 const downloadImage = async (url: string): Promise<Uint8Array | null> => {

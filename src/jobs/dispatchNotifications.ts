@@ -7,18 +7,18 @@ import type { EmailContact } from '../dtos/emailContact';
 import { getFullInfoByCoords, type GeoApiPTResponse } from '../gateways/geoApiPT';
 
 import { findRegionsByPoint, NotificationRegion } from '../models/notificationRegion';
-import { STATUS, getReportsByStatus, Report, updateReport } from '../models/report';
+import { STATUS, getReportsByStatus, Report, updateReport, type GeoInfo } from '../models/report';
 import { createNotificationHistory, type NotificationHistory } from '../models/notificationHistory';
 
 export const dispatchNotifications = async () => {
-    Logger.info("Starting dispatchNotifications job");
+    Logger.info("=== Starting dispatchNotifications job ====================");
     try {
         doDispatchNotifications()
     } catch (error) {
         Logger.error(`Error dispatching notifications: ${error}`);
     }
 
-    Logger.info("Finished dispatchNotifications job");
+    Logger.info("=== Finished dispatchNotifications job ====================");
 }
 
 const doDispatchNotifications = async () => {
@@ -117,22 +117,23 @@ const handleEmailNotification = async (region: NotificationRegion, report: Repor
         return
     }
 
-    const locationFullInfo = await tryGetFullInfoByCoords(report.location.latitude, report.location.longitude);
-    if (!locationFullInfo) {
-        Logger.error(`Failed to get location full info for report ${report._id}`);
+    // If no geo info, send back to fill_geo_info status to get it populated
+    if (!report.geoInfo) {
+        Logger.info(`No geo info for report ${report._id}, sending it back to fill_geo_info status`);
+        report.status = STATUS.FILL_GEO_INFO;
+        await updateReport(report);
         return
     }
-
-    // date format: dd/mm/yyyy
-    const dateStr = new Date(report.createdAt).toLocaleDateString('pt-PT');
-    const body = buildBody(report, locationFullInfo);
-    const cc = report.reporterInfo ? [
-        { email: report.reporterInfo.email, name: report.reporterInfo.name }
-    ] : [];
 
     let success = true;
     let errorMessage = '';
     try {
+        const dateStr = new Date(report.createdAt).toLocaleDateString('pt-PT');
+        const body = buildBody(report);
+        const cc = report.reporterInfo ? [
+            { email: report.reporterInfo.email, name: report.reporterInfo.name }
+        ] : [];
+
         success = await sendEmail(
             { email: config.app.reportsEmail, name: config.app.reportsEmailName } as EmailContact,
             { email: email, name: email } as EmailContact,
@@ -144,6 +145,7 @@ const handleEmailNotification = async (region: NotificationRegion, report: Repor
 
         Logger.info(`Email sent to ${email} successfully`);
     } catch (error: any) {
+        success = false;
         errorMessage = error.message || `${error}`;
         Logger.error(`Failed to send email to ${email}`);
     }
@@ -158,7 +160,10 @@ const handleEmailNotification = async (region: NotificationRegion, report: Repor
     } as NotificationHistory);
 }
 
-const buildBody = (report: Report, locationFullInfo : GeoApiPTResponse): string => {
+const buildBody = (report: Report): string => {
+    if (!report.geoInfo) {
+        throw new Error('GeoInfo is required to build the email body');
+    }
 
     const day = new Date(report.createdAt).toLocaleDateString('pt-PT');
     const time = new Date(report.createdAt).toLocaleTimeString('pt-PT');
@@ -166,7 +171,7 @@ const buildBody = (report: Report, locationFullInfo : GeoApiPTResponse): string 
     let message = `<p>Estimados Agentes da Autoridade</p>`
 
     message += `<p>No passado dia <b>${day}</b>, pelas <b>${time}</b>, a viatura com a matrícula <b>${report.plate?.number}</b>, foi fotografada
-    em alegada violação do código da estrada, junto a <b>${getAddress(locationFullInfo)}</b>.
+    em alegada violação do código da estrada, junto a <b>${getAddress(report.geoInfo)}</b>.
     As coordenadas exatas do local são as seguintes: ${report.location.latitude}, ${report.location.longitude} 
     (<a href="${getGoogleMapsLink(report)}">Link Google Maps</a>)</p>`
 
@@ -194,7 +199,7 @@ const buildBody = (report: Report, locationFullInfo : GeoApiPTResponse): string 
     return message
 }
 
-const getAddress = (locationFullInfo: GeoApiPTResponse): string => {
+const getAddress = (locationFullInfo: GeoInfo): string => {
 
     let street = locationFullInfo.rua ? `${locationFullInfo.rua}` : '';
     let number = locationFullInfo.n_porta ? ` ${locationFullInfo.n_porta}` : '';
@@ -206,7 +211,7 @@ const getAddress = (locationFullInfo: GeoApiPTResponse): string => {
     return `${street}${number}${postalCode}${freguesia}${municipality}${district}`
 }
 
-const tryGetFullInfoByCoords = async (latitude: number, longitude: number) : Promise<GeoApiPTResponse | null> => {
+const tryGetFullInfoByCoords = async (latitude: number, longitude: number): Promise<GeoApiPTResponse | null> => {
     let tries = 0;
     while (tries < 3) {
         const result = await getFullInfoByCoords(latitude, longitude)
@@ -221,7 +226,7 @@ const tryGetFullInfoByCoords = async (latitude: number, longitude: number) : Pro
     return null;
 }
 
-const getGoogleMapsLink = (report : Report): string => {
+const getGoogleMapsLink = (report: Report): string => {
     return `https://www.google.com/maps/search/?api=1&query=${report.location.latitude},${report.location.longitude}`;
 }
 

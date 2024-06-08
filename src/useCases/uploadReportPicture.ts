@@ -52,7 +52,7 @@ export const uploadReportPictureUC = async (request: UploadReportPictureRequest)
         
         report.picture = filePath
         report.originalPicture = filePathBackup
-        report.status = STATUS.REVIEW
+        report.status = STATUS.FILL_GEO_INFO
         await updateReport(report)
     } catch (error) {
         console.error("Could not upload picture to S3: ", error);

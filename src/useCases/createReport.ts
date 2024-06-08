@@ -10,14 +10,11 @@ export const createReportUC = async (request : CreateReportRequest) : Promise<Re
         throw new Error('Denúncia bloqueada por suspeitas de fraude');
     }
 
-    const municipality = await getMunicipalityByCoords(request.location.latitude, request.location.longitude)
-
     const result = await createReport({
         location: {
             latitude: request.location.latitude,
             longitude: request.location.longitude
         },
-        municipality: municipality ?? undefined,
         deviceUUID: request.deviceUUID,
         ipAddress: request.ipAddress,
         userAgent: request.userAgent,
