@@ -39,7 +39,7 @@ const doDispatchNotifications = async () => {
 
         await handleRegions(report, regions);
 
-        // Update report status to confirmed
+        // Update to confirmed_blur_plates and remove reporter info
         report.reporterInfo = undefined;
         await updateReport(report);
     }

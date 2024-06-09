@@ -117,6 +117,7 @@ const runTransitionVerification = async (report: Report, votes: ReportVote[]) =>
         report.userAgent = "redacted"
         report.ipAddress = "redacted"
         report.deviceUUID = "redacted"
+        report.reporterInfo = undefined
         await updateReport(report)
         Logger.info(`Report ${report._id} rejected`)
         return
