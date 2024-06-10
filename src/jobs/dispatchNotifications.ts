@@ -4,7 +4,6 @@ import { sendEmail } from '../services/emailSender';
 import Logger from '../utils/logger';
 import config from '../config';
 import type { EmailContact } from '../dtos/emailContact';
-import { getFullInfoByCoords, type GeoApiPTResponse } from '../gateways/geoApiPT';
 
 import { findRegionsByPoint, NotificationRegion } from '../models/notificationRegion';
 import { STATUS, getReportsByStatus, Report, updateReport, type GeoInfo } from '../models/report';
@@ -170,16 +169,16 @@ const buildBody = (report: Report): string => {
 
     let message = `<p>Estimados Agentes da Autoridade</p>`
 
-    message += `<p>No passado dia <b>${day}</b>, pelas <b>${time}</b>, a viatura com a matrícula <b>${report.plate?.number}</b>, foi fotografada
+    message += `<p>No passado dia <b>${day}</b>, pelas <b>${time}</b> UTC, a viatura com a matrícula <b>${report.plate?.number}</b>, foi fotografada
     em alegada violação do código da estrada, junto a <b>${getAddress(report.geoInfo)}</b>.
-    As coordenadas exatas do local são as seguintes: ${report.location.latitude}, ${report.location.longitude} 
+    As coordenadas do local no exato momento da captura da imagem são as seguintes: <b>${report.location.latitude}, ${report.location.longitude}</b>
     (<a href="${getGoogleMapsLink(report)}">Link Google Maps</a>)</p>`
 
-    message += `<p>A fotografia, que foi tirada através da aplicação de denúncias, e que comprova a infração, pode ser pré visualizada abaixo:</p>`
+    message += `<p>A fotografia, que foi tirada através da aplicação de denúncias, e que comprova a infração, pode ser <b>pré visualizada</b> abaixo:</p>`
     message += `<img src="${getImageUrl(report)}" alt="Fotografia da viatura" style="max-width: 100%;"/>`
-    message += `<p>A seguinte hash criptográfica, gerada no momento e local da infração, ainda no dispositivo do denunciante, e a partir da fotografia reproduzida, 
-    prova que a imagem não foi adulterada enquanto armazenada ou em trânsito. Hash SHA256: ${report.imageHash}. A imagem original está disponível 
-    <a href="${getImageUrl(report)}">aqui</a>, e a hash pode ser validada através de qualquer ferramenta online, como por exemplo 
+    message += `<p>A seguinte hash criptográfica, gerada no momento e local da infração, ainda no dispositivo do denunciante, e a partir da fotografia reproduzida 
+    imediatamente após esta ser capturada, prova que a imagem não foi adulterada enquanto armazenada ou em trânsito. <b>Hash SHA256:</b> ${report.imageHash}. 
+    A imagem original está disponível <a href="${getImageUrl(report)}">aqui</a>, e a hash pode ser validada através de qualquer ferramenta online, como por exemplo 
     <a href="https://emn178.github.io/online-tools/sha256_checksum.html">esta</a>.</p>`
 
     message += addReporterInfo(report);
@@ -188,8 +187,8 @@ const buildBody = (report: Report): string => {
     por denúncia de contra-ordenação, levanta auto, não carecendo de presenciar tal contra-ordenação rodoviária, situação a que se 
     aplica o n.º 1 do mesmo artigo.</p>`
 
-    message += `<p>Para quaisquer esclarecimentos não hesitem em entrar em contacto.</p>`
-    message += `<p>Sem mais de momento,<br/>Continuação de um bom dia.</p>`
+    message += `<p>Serve o presente email como denúncia, para quaisquer esclarecimentos não hesitem em entrar em contacto.</p>`
+    message += `<p>Sem mais de momento,<br/>Continuação de um bom dia e obrigado pela atenção.</p>`
 
     message += `<small style="opacity: 75%">Esta denúncia foi validada e confirmada por, pelo menos, 3 pessoas diferentes para além do denunciante antes de 
     ser automaticamente enviada para este endereço de email. Endereço esse que foi o escolhido por ter sido identificado como pertencendo à autoridade responsável 
@@ -208,21 +207,6 @@ const getAddress = (locationFullInfo: GeoInfo): string => {
     let municipality = locationFullInfo.concelho ? `, ${locationFullInfo.concelho}` : '';
 
     return `${street}${number}${postalCode}${freguesia}${municipality}`
-}
-
-const tryGetFullInfoByCoords = async (latitude: number, longitude: number): Promise<GeoApiPTResponse | null> => {
-    let tries = 0;
-    while (tries < 3) {
-        const result = await getFullInfoByCoords(latitude, longitude)
-        if (result) {
-            return result
-        }
-        // wait 1 second to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        tries++;
-    }
-
-    return null;
 }
 
 const getGoogleMapsLink = (report: Report): string => {
@@ -244,15 +228,17 @@ const addReporterInfo = (report: Report): string => {
     }
 
     let message = `<h3>Denunciante/Testemunha:</h3>`
-    message += `<p>Nome: ${report.reporterInfo.name}<br/>
-    Documento de Identificação: ${getDocumentTypeStr(report.reporterInfo.idType)} ${report.reporterInfo.idNumber}<br/>
-    Email: ${report.reporterInfo.email}<br/>
+    message += `<p><b>Nome:</b> ${report.reporterInfo.name}<br/>
+    <b>Documento de Identificação:</b> ${getDocumentTypeStr(report.reporterInfo.idType)} ${report.reporterInfo.idNumber}<br/>
+    <b>Email:</b> ${report.reporterInfo.email}<br/>
     </p>`
 
     if (report.reporterInfo.obs) {
         message += `<h3>O denunciante fez questão de deixar a seguinte nota:</h3>`
-        message += `<p>${report.reporterInfo.obs}</p></br>`
+        message += `<p>${report.reporterInfo.obs}</p>`
     }
+
+    message += `<p>Por favor, para quaisquer esclarecimentos, contactar o email do denunciante diretamente.</p></br>`
 
     return message
 }
