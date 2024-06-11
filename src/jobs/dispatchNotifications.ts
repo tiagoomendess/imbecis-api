@@ -167,7 +167,7 @@ const buildBody = (report: Report): string => {
     const day = new Date(report.createdAt).toLocaleDateString('pt-PT');
     const time = new Date(report.createdAt).toLocaleTimeString('pt-PT');
 
-    let message = `<p>Estimados Agentes da Autoridade</p>`
+    let message = `<p>Excelentíssimos Agentes de Autoridade</p>`
 
     message += `<p>No passado dia <b>${day}</b>, pelas <b>${time}</b> UTC, a viatura com a matrícula <b>${report.plate?.number}</b>, foi fotografada
     em alegada violação do código da estrada, junto a <b>${getAddress(report.geoInfo)}</b>.
