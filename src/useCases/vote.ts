@@ -98,7 +98,7 @@ const runTransitionVerification = async (report: Report, votes: ReportVote[]) =>
     console.log(`Votes array length ${votes.length}, imbecileVotes ${imbecileVotes}, notSureVotes ${notSureVotes}, totalVotes ${totalVotes}`)
 
     // If there are 3 or more cotes with result = imbecile and all the votes agree on the same plate number, confirm the report
-    if (imbecileVotes >= 4 && imbecileVotes > totalVotes * 0.66) {
+    if (imbecileVotes >= 6 && imbecileVotes > totalVotes * 0.66) {
         for (const plateNumber in plateNumbers) {
             if (plateNumbers[plateNumber] >= 4 && plateNumber != "") {
                 Logger.info(`Plate ${plateNumber} has ${plateNumbers[plateNumber]} votes and will be confirmed as imbecile`)

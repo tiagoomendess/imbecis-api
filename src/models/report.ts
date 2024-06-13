@@ -157,7 +157,7 @@ export const getReportForReview =
                     }
                 },
                 {
-                    $sample: { size: 1 }
+                    $sort: { createdAt: 1 }
                 }
             ]).toArray();
 
