@@ -9,6 +9,7 @@ export const COUNTRY_CODE_NL = "nl"
 export const COUNTRY_CODE_LU = "lu"
 export const COUNTRY_CODE_AD = "ad"
 export const COUNTRY_CODE_DK = "dk"
+export const COUNTRY_CODE_BE = "be"
 
 export const AVAILABLE_COUNTRY_CODES = [
     COUNTRY_CODE_PT,
@@ -21,7 +22,8 @@ export const AVAILABLE_COUNTRY_CODES = [
     COUNTRY_CODE_NL,
     COUNTRY_CODE_LU,
     COUNTRY_CODE_AD,
-    COUNTRY_CODE_DK
+    COUNTRY_CODE_DK,
+    COUNTRY_CODE_BE
 ]
 
 export const MUNICIPALITIES = [
