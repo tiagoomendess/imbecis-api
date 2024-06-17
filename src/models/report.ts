@@ -2,6 +2,7 @@ import type { Coordinate } from './coordinate';
 import db from '../database/mongo'
 import { ObjectId } from 'mongodb';
 import type { Plate } from './plate';
+import { ReportVote } from './reportVote';
 
 export const STATUS = {
     NEW: 'new',
@@ -11,6 +12,8 @@ export const STATUS = {
     NOTIFY: 'notify', // This state will notify whatever is configured
     CONFIRMED_BLUR_PLATES: 'confirmed_blur_plates', // This state will blur the plates
     CONFIRMED: 'confirmed', // This state make the report public
+    CONFIRMED_MANUAL_VERIFY: 'confirmed_manual_verify', // When report deem to risky for automatic confirmation
+    REMOVED: 'removed', // Soft delete
 }
 
 export interface ReporterInfo {
@@ -51,6 +54,7 @@ export interface Report {
     imageHash?: string;
     reporterInfo?: ReporterInfo;
     geoInfo?: GeoInfo;
+    reportVotes?: ReportVote[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -200,10 +204,10 @@ export const countAvailableReportsForReview = async (ipAddress: string, deviceUU
             },
         ]).toArray();
 
-        return results.length > 0 ? results[0].count : 0;
+    return results.length > 0 ? results[0].count : 0;
 };
 
-export const getConfirmedReports = async (page: number = 1, municipality : string = ""): Promise<Report[]> => {
+export const getConfirmedReports = async (page: number = 1, municipality: string = ""): Promise<Report[]> => {
     const matchCondition: any = {
         status: STATUS.CONFIRMED
     };
@@ -249,7 +253,7 @@ export const getReportsByPlateId = async (plateId: ObjectId, page: number = 1): 
             {
                 $match: {
                     plateId: plateId,
-                    status: { $in: [STATUS.CONFIRMED, STATUS.NOTIFY, STATUS.CONFIRMED_BLUR_PLATES]},
+                    status: { $in: [STATUS.CONFIRMED, STATUS.NOTIFY, STATUS.CONFIRMED_BLUR_PLATES] },
                 }
             },
             { $sort: { updatedAt: -1 } },
@@ -303,7 +307,7 @@ export const getReportsByStatus = async (status: string, page: number = 1): Prom
     return reportsWithPlates;
 }
 
-export const getReportsByUuidOrIp = async (deviceUUID: string, ipAddress : string, page: number = 1): Promise<Report[]> => {
+export const getReportsByUuidOrIp = async (deviceUUID: string, ipAddress: string, page: number = 1): Promise<Report[]> => {
     const reportsWithPlates = await db
         .collection<Report>(collection)
         .aggregate<Report>([
@@ -349,4 +353,98 @@ export const getReportsToFillGeoInfo = async (page: number = 1): Promise<Report[
         ]).toArray();
 
     return reports;
+}
+
+export interface ListReportsParams {
+    page: number;
+    municipality?: string;
+    status?: string;
+    sortOrder: string;
+}
+
+export interface PaginatedListReports {
+    reports: Report[];
+    total: number;
+    page: number;
+}
+
+export const listReports = async (params: ListReportsParams): Promise<PaginatedListReports> => {
+
+    const matchCondition: any = {};
+
+    // Conditionally add municipality to the match condition if it is not an empty string
+    if (params.municipality) {
+        matchCondition.municipality = params.municipality;
+    }
+
+    // Conditionally add status to the match condition if it is not an empty string
+    if (params.status) {
+        matchCondition.status = params.status;
+    }
+
+    const sortOrder = params.sortOrder === 'asc' ? 1 : -1;
+
+    const totalResult = await db
+        .collection<Report>(collection)
+        .aggregate([
+            { $match: matchCondition },
+            {
+                $count: 'count'
+            },
+        ]).toArray();
+
+        const total = totalResult.length > 0 ? totalResult[0].count : 0;
+
+    const reports = await db
+        .collection<Report>(collection)
+        .aggregate<Report>([
+            { $match: matchCondition },
+            { $sort: { createdAt: sortOrder } },
+            { $skip: (params.page - 1) * 10 },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: 'plates',
+                    localField: 'plateId',
+                    foreignField: '_id',
+                    as: 'plate'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$plate',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'reportVotes',
+                    localField: '_id',
+                    foreignField: 'reportId',
+                    as: 'reportVotes'
+                }
+            },
+        ]).toArray();
+
+        return {
+            reports: reports,
+            total: total,
+            page: params.page
+        };
+}
+
+export const countTotalReports = async (): Promise<number> => {
+    const count = await db
+        .collection<Report>(collection)
+        .countDocuments();
+
+    return count;
+}
+
+export const deleteReport = async (id: ObjectId): Promise<boolean> => {
+    const result = await db
+        .collection<Report>(collection)
+        .deleteOne({ _id: id });
+
+    return result.deletedCount > 0;
 }

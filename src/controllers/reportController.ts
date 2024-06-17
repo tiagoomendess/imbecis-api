@@ -7,6 +7,9 @@ import { GetReportForReviewRequest } from "../dtos/requests/getReportForReviewRe
 import { GetReportByIdRequest } from "../dtos/requests/getReportByIdRequest";
 import { GetFeedRequest } from "../dtos/requests/getFeedRequest";
 import { VoteRequest } from "../dtos/requests/voteRequest";
+import { ListReportsRequest } from "../dtos/requests/listReportsRequest";
+import { UpdateReportRequest } from "../dtos/requests/updateReportRequest";
+import { DeleteReportRequest } from "../dtos/requests/deleteReportRequest";
 
 import { uploadReportPictureUC } from "../useCases/uploadReportPicture";
 import { getReportForReviewUC } from "../useCases/getReportForReview";
@@ -16,6 +19,9 @@ import { getFeedUC } from "../useCases/getFeed";
 import { voteUC } from "../useCases/vote";
 import { updateReportPictureUC } from "../useCases/updateReportPicture";
 import { countAvailableReportsForReviewUC } from "../useCases/countAvailableReportsForReviewUC";
+import { listReportsUC } from "../useCases/listReports";
+import { updateReportUC } from "../useCases/updateReport";
+import { deleteReportUC } from "../useCases/deleteReport";
 
 import { BadRequestError } from "../errors";
 import { UpdateReportPictureRequest } from "../dtos/requests/updateReportPictureRequest";
@@ -150,6 +156,46 @@ export const countAvailableReportsForReview = async (req: Request, res: Response
             payload: {
                 count: result
             }
+        } as BaseResponse)
+    } catch (error) {
+        return next(error)
+    }
+}
+
+export const listReports = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const response = await listReportsUC(req.body as ListReportsRequest)
+
+        res.status(200).send({
+            success: true,
+            message: "Report List",
+            payload: response
+        } as BaseResponse)
+    } catch (error) {
+        return next(error)
+    }
+}
+
+export const updateReport = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await updateReportUC(req.body as UpdateReportRequest)
+        res.status(200).send({
+            success: true,
+            message: "Denúncia atualizada com sucesso",
+            payload: true
+        } as BaseResponse)
+    } catch (error) {
+        return next(error)
+    }
+}
+
+export const deleteReport = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await deleteReportUC(req.body as DeleteReportRequest)
+        res.status(200).send({
+            success: true,
+            message: "Denúncia eliminada com sucesso",
+            payload: null
         } as BaseResponse)
     } catch (error) {
         return next(error)

@@ -12,6 +12,10 @@ import { GetReportByIdRequest } from '../dtos/requests/getReportByIdRequest';
 import { GetFeedRequest } from '../dtos/requests/getFeedRequest';
 import { VoteRequest } from '../dtos/requests/voteRequest';
 import { UpdateReportPictureRequest } from '../dtos/requests/updateReportPictureRequest';
+import { ListReportsRequest } from '../dtos/requests/listReportsRequest';
+import { UpdateReportRequest } from '../dtos/requests/updateReportRequest';
+import { DeleteReportRequest } from '../dtos/requests/deleteReportRequest';
+
 import injectExtraData from '../middlewares/injectExtraData';
 
 import {
@@ -22,7 +26,10 @@ import {
     getFeed,
     updatePicture,
     vote,
-    countAvailableReportsForReview
+    countAvailableReportsForReview,
+    listReports,
+    updateReport,
+    deleteReport,
 } from '../controllers/reportController';
 
 const upload = multer({
@@ -41,8 +48,10 @@ const upload = multer({
 
 const router = express.Router()
 
-// Create a new report
 router.post('/', validationMiddleware(CreateReportRequest), createReport)
+router.get('/', validationMiddleware(ListReportsRequest), listReports)
+router.patch('/:reportId([a-z0-9]{24})', validationMiddleware(UpdateReportRequest), updateReport)
+router.delete('/:reportId([a-z0-9]{24})', validationMiddleware(DeleteReportRequest), deleteReport)
 
 // TODO: Remove injectExtraData from these two, should not be necessary, the upload middleware is the one braking things
 router.post('/:reportId([a-z0-9]{24})/upload-picture', upload.single('picture'), injectExtraData, validationMiddleware(UploadReportPictureRequest), csrf, uploadPicture)
