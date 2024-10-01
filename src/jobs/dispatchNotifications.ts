@@ -116,6 +116,11 @@ const handleEmailNotification = async (region: NotificationRegion, report: Repor
         return
     }
 
+    if (!report.reporterInfo) {
+        Logger.info(`Skipping email because no reporter info was added`);
+        return
+    }
+
     // If no geo info, send back to fill_geo_info status to get it populated
     if (!report.geoInfo) {
         Logger.info(`No geo info for report ${report._id}, sending it back to fill_geo_info status`);
