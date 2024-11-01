@@ -15,6 +15,7 @@ import { UpdateReportPictureRequest } from '../dtos/requests/updateReportPicture
 import { ListReportsRequest } from '../dtos/requests/listReportsRequest';
 import { UpdateReportRequest } from '../dtos/requests/updateReportRequest';
 import { DeleteReportRequest } from '../dtos/requests/deleteReportRequest';
+import { HeatMapRequest } from '../dtos/requests/heatMapRequest';
 
 import injectExtraData from '../middlewares/injectExtraData';
 
@@ -30,6 +31,7 @@ import {
     listReports,
     updateReport,
     deleteReport,
+    getHeatMap,
 } from '../controllers/reportController';
 
 const upload = multer({
@@ -62,5 +64,6 @@ router.get('/for-review/count', validationMiddleware(GetReportForReviewRequest),
 router.get('/:reportId([a-z0-9]{24})', validationMiddleware(GetReportByIdRequest), getReportById)
 router.get('/feed', validationMiddleware(GetFeedRequest), getFeed)
 router.post('/:reportId([a-z0-9]{24})/vote', validationMiddleware(VoteRequest), csrf, vote)
+router.get('/heat-map', validationMiddleware(HeatMapRequest), getHeatMap)
 
 export default router;

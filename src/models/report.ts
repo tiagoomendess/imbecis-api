@@ -3,6 +3,7 @@ import db from '../database/mongo'
 import { ObjectId } from 'mongodb';
 import type { Plate } from './plate';
 import { ReportVote } from './reportVote';
+import { HeatMapCoordinate } from '../dtos/responses/heatMapResponse';
 
 export const STATUS = {
     NEW: 'new',
@@ -447,4 +448,27 @@ export const deleteReport = async (id: ObjectId): Promise<boolean> => {
         .deleteOne({ _id: id });
 
     return result.deletedCount > 0;
+}
+
+export const getHeatMapCoordinates = async (): Promise<HeatMapCoordinate[]> => {
+
+    const coordinates = await db
+        .collection<Report>(collection)
+        .aggregate<Coordinate>([
+            {
+                $match: {
+                    status: { $in: [STATUS.CONFIRMED, STATUS.REMOVED] }
+                }
+            },
+            {
+                $project: {
+                    latitude: "$location.latitude",
+                    longitude: "$location.longitude",
+                    _id: 0 // Exclude the `_id` field from the results
+                }
+            }
+        ])
+        .toArray();
+
+    return coordinates;
 }

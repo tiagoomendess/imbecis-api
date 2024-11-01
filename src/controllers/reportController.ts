@@ -10,6 +10,7 @@ import { VoteRequest } from "../dtos/requests/voteRequest";
 import { ListReportsRequest } from "../dtos/requests/listReportsRequest";
 import { UpdateReportRequest } from "../dtos/requests/updateReportRequest";
 import { DeleteReportRequest } from "../dtos/requests/deleteReportRequest";
+import { HeatMapRequest } from "../dtos/requests/heatMapRequest";
 
 import { uploadReportPictureUC } from "../useCases/uploadReportPicture";
 import { getReportForReviewUC } from "../useCases/getReportForReview";
@@ -22,6 +23,7 @@ import { countAvailableReportsForReviewUC } from "../useCases/countAvailableRepo
 import { listReportsUC } from "../useCases/listReports";
 import { updateReportUC } from "../useCases/updateReport";
 import { deleteReportUC } from "../useCases/deleteReport";
+import { getHeatMapCoordinatesUC } from "../useCases/getHeatMapCoordinatesUC";
 
 import { BadRequestError } from "../errors";
 import { UpdateReportPictureRequest } from "../dtos/requests/updateReportPictureRequest";
@@ -196,6 +198,19 @@ export const deleteReport = async (req: Request, res: Response, next: NextFuncti
             success: true,
             message: "Denúncia eliminada com sucesso",
             payload: null
+        } as BaseResponse)
+    } catch (error) {
+        return next(error)
+    }
+}
+
+export const getHeatMap = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await getHeatMapCoordinatesUC(req.body as HeatMapRequest)
+        res.status(200).send({
+            success: true,
+            message: "Heat Map success",
+            payload: result
         } as BaseResponse)
     } catch (error) {
         return next(error)
