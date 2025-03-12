@@ -97,11 +97,11 @@ const runTransitionVerification = async (report: Report, votes: ReportVote[]) =>
 
     console.log(`Votes array length ${votes.length}, imbecileVotes ${imbecileVotes}, notSureVotes ${notSureVotes}, totalVotes ${totalVotes}`)
 
-    // If there are 4 or more votes with result imbecile and it's equal or more than 66% of the votes
-    if (imbecileVotes >= 4 && imbecileVotes >= totalVotes * 0.66) {
+    // If there are 3 or more votes with result imbecile and it's equal or more than 66% of the votes
+    if (imbecileVotes >= 3 && imbecileVotes >= totalVotes * 0.66) {
         for (const plateNumber in plateNumbers) {
-            // If the plate has 4 or more votes, confirm it
-            if (plateNumbers[plateNumber] >= 4 && plateNumber != "") {
+            // If the plate has 3 or more votes, confirm it
+            if (plateNumbers[plateNumber] >= 3 && plateNumber != "") {
                 Logger.info(`Plate ${plateNumber} has ${plateNumbers[plateNumber]} votes and will be confirmed as imbecile`)
                 const plate = await getOrCreatePlate(plateNumber, mostVotedCountry)
                 report.plateId = plate._id
