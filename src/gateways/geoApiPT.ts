@@ -33,6 +33,9 @@ export interface GeoApiPTResponse {
 
 export const getFullInfoByCoords = async (latitude: number, longitude: number) : Promise<GeoApiPTResponse | null> => {
     try {
+        // wait 1 second to avoid hitting rate limits
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
         const response = await axios.get(`${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=true&key=${config.geoApiPT.key}`)
         if (response.status !== 200) {
             return null
