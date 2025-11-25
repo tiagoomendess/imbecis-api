@@ -1,6 +1,7 @@
 import axios from 'axios'
 import config from '../config'
 import Logger from '../utils/logger'
+import https from 'https'
 
 const BASE_URL = 'https://json.geoapi.pt'
 
@@ -48,22 +49,21 @@ export const getFullInfoByCoords = async (latitude: number, longitude: number): 
         // wait 1 second to avoid hitting rate limits
         await new Promise(resolve => setTimeout(resolve, 1000))
 
-        const response = await axios.get(
-            `${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=true`,
-            {
-                headers: {
-                    'X-API-Key': `${config.geoApiPT.key}`,
+        const axiosInstance = axios.create({
+            httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+            proxy: {
+                host: 'dc.decodo.com',
+                port: 10000,
+                auth: {
+                    username: 'splkso1pnf',
+                    password: config.geoApiPT.proxyPassword,
                 },
-                proxy: {
-                    host: 'dc.decodo.com',
-                    port: 10000,
-                    auth: {
-                        username: 'splkso1pnf',
-                        password: config.geoApiPT.proxyPassword,
-                    },
-                },
-                timeout: 5000,
-            }
+            },
+            timeout: 5000,
+          })
+
+        const response = await axiosInstance.get(
+            `${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=true`
         )
         if (response.status !== 200) {
             return null
