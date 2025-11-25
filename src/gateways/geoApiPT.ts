@@ -5,12 +5,19 @@ import Logger from '../utils/logger'
 const BASE_URL = 'https://json.geoapi.pt'
 
 export const getMunicipalityByCoords = async (latitude: number, longitude: number): Promise<string | null> => {
-    Logger.info(`API Key: ${config.geoApiPT.key}`)
     try {
         // wait 1 second to avoid hitting rate limits
         await new Promise(resolve => setTimeout(resolve, 1000))
 
-        const response = await axios.get(`${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=false`)
+        const response = await axios.get(
+            `${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=false`,
+            {
+                headers: {
+                    'X-API-Key': `${config.geoApiPT.key}`,
+                },
+                timeout: 5000,
+            }
+        )
         if (response.status !== 200) {
             return null
         }
@@ -19,9 +26,6 @@ export const getMunicipalityByCoords = async (latitude: number, longitude: numbe
     } catch (error) {
         Logger.error(`Could not get municipality for coordinates ${latitude}, ${longitude} from GeoApiPT: ${error}`)
         return null
-    } finally {
-        // Reset axios to not use any proxy
-        axios.defaults.proxy = false
     }
 }
 
@@ -40,12 +44,19 @@ export interface GeoApiPTResponse {
 }
 
 export const getFullInfoByCoords = async (latitude: number, longitude: number): Promise<GeoApiPTResponse | null> => {
-    Logger.info(`API Key: ${config.geoApiPT.key}`)
     try {
         // wait 1 second to avoid hitting rate limits
         await new Promise(resolve => setTimeout(resolve, 1000))
 
-        const response = await axios.get(`${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=true`)
+        const response = await axios.get(
+            `${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=true`,
+            {
+                headers: {
+                    'X-API-Key': `${config.geoApiPT.key}`,
+                },
+                timeout: 5000,
+            }
+        )
         if (response.status !== 200) {
             return null
         }
@@ -57,6 +68,15 @@ export const getFullInfoByCoords = async (latitude: number, longitude: number): 
         return response.data as GeoApiPTResponse
     } catch (error) {
         Logger.error(`Could not get full info for coordinates ${latitude}, ${longitude} from GeoApiPT: ${error}`)
+
+        if (error instanceof axios.AxiosError && error.response) {
+            // Log response body for debugging
+            Logger.error(`GeoApiPT response error: ${JSON.stringify(error.response.data)}`)
+
+            // Log response headers for debugging
+            Logger.error(`GeoApiPT response headers: ${JSON.stringify(error.response.headers)}`)
+        }
+
         return null
     }
 }
