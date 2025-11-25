@@ -54,6 +54,14 @@ export const getFullInfoByCoords = async (latitude: number, longitude: number): 
                 headers: {
                     'X-API-Key': `${config.geoApiPT.key}`,
                 },
+                proxy: {
+                    host: 'dc.decodo.com',
+                    port: 10000,
+                    auth: {
+                        username: 'splkso1pnf',
+                        password: config.geoApiPT.proxyPassword,
+                    },
+                },
                 timeout: 5000,
             }
         )

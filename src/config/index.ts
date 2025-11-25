@@ -19,6 +19,7 @@ const AppConfig = {
     },
     geoApiPT: {
       key: <string>process.env.GEO_API_PT_KEY || "abcdef12345",
+      proxyPassword: <string>process.env.GEO_API_PT_PROXY_PASSWORD || "thisnotakey",
     },
     db: {
       mongoUri: <string>process.env.MONGO_URI || "",
