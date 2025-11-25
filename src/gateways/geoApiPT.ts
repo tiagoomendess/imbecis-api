@@ -1,5 +1,6 @@
 import axios from 'axios'
 import config from '../config'
+import Logger from '../utils/logger'
 
 const BASE_URL = 'https://json.geoapi.pt'
 
@@ -25,9 +26,9 @@ export const getMunicipalityByCoords = async (latitude: number, longitude: numbe
 
         // Select 1 random proxy from the list
         const randomProxy = proxyList[Math.floor(Math.random() * proxyList.length)]
+        Logger.info(`Using proxy ${randomProxy} for GeoApiPT request`)
 
         if (randomProxy !== "no_proxy") {
-            console.log(`Using proxy ${randomProxy} for GeoApiPT request`)
             // set axios to use the proxy
             axios.defaults.proxy = {
                 host: randomProxy.split(':')[0],
