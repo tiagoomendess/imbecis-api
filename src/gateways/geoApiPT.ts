@@ -27,6 +27,7 @@ export const getMunicipalityByCoords = async (latitude: number, longitude: numbe
         const randomProxy = proxyList[Math.floor(Math.random() * proxyList.length)]
 
         if (randomProxy !== "no_proxy") {
+            console.log(`Using proxy ${randomProxy} for GeoApiPT request`)
             // set axios to use the proxy
             axios.defaults.proxy = {
                 host: randomProxy.split(':')[0],
