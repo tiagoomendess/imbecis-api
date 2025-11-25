@@ -23,7 +23,6 @@ const proxyList = [
 
 export const getMunicipalityByCoords = async (latitude: number, longitude: number): Promise<string | null> => {
     try {
-
         // Select 1 random proxy from the list
         const randomProxy = proxyList[Math.floor(Math.random() * proxyList.length)]
         Logger.info(`Using proxy ${randomProxy} for GeoApiPT request`)
@@ -35,6 +34,9 @@ export const getMunicipalityByCoords = async (latitude: number, longitude: numbe
                 port: parseInt(randomProxy.split(':')[1])
             }
         }
+
+        // wait 1 second to avoid hitting rate limits
+        await new Promise(resolve => setTimeout(resolve, 1000))
 
         const response = await axios.get(`${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=false`)
         if (response.status !== 200) {
@@ -67,10 +69,22 @@ export interface GeoApiPTResponse {
 
 export const getFullInfoByCoords = async (latitude: number, longitude: number): Promise<GeoApiPTResponse | null> => {
     try {
+        // Select 1 random proxy from the list
+        const randomProxy = proxyList[Math.floor(Math.random() * proxyList.length)]
+        Logger.info(`Using proxy ${randomProxy} for GeoApiPT request`)
+
+        if (randomProxy !== "no_proxy") {
+            // set axios to use the proxy
+            axios.defaults.proxy = {
+                host: randomProxy.split(':')[0],
+                port: parseInt(randomProxy.split(':')[1])
+            }
+        }
+
         // wait 1 second to avoid hitting rate limits
         await new Promise(resolve => setTimeout(resolve, 1000))
 
-        const response = await axios.get(`${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=true&key=${config.geoApiPT.key}`)
+        const response = await axios.get(`${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=true`)
         if (response.status !== 200) {
             return null
         }
