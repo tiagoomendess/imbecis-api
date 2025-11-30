@@ -50,15 +50,6 @@ export const getFullInfoByCoords = async (latitude: number, longitude: number): 
         await new Promise(resolve => setTimeout(resolve, 1000))
 
         const axiosInstance = axios.create({
-            httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-            proxy: {
-                host: 'dc.decodo.com',
-                port: 10000,
-                auth: {
-                    username: 'splkso1pnf',
-                    password: config.geoApiPT.proxyPassword,
-                },
-            },
             timeout: 5000,
           })
 
