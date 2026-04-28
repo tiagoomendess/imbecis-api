@@ -1,12 +1,13 @@
 import axios from 'axios'
 import config from '../config'
 import Logger from '../utils/logger'
-import https from 'https'
 
 const BASE_URL = 'https://json.geoapi.pt'
 
 export const getMunicipalityByCoords = async (latitude: number, longitude: number): Promise<string | null> => {
     try {
+        console.log(`API KEY: ${config.geoApiPT.key}`)
+
         // wait 1 second to avoid hitting rate limits
         await new Promise(resolve => setTimeout(resolve, 1000))
 
@@ -46,10 +47,14 @@ export interface GeoApiPTResponse {
 
 export const getFullInfoByCoords = async (latitude: number, longitude: number): Promise<GeoApiPTResponse | null> => {
     try {
+        console.log(`API KEY: ${config.geoApiPT.key}`)
         // wait 1 second to avoid hitting rate limits
         await new Promise(resolve => setTimeout(resolve, 1000))
 
         const axiosInstance = axios.create({
+            headers: {
+                'X-API-Key': `${config.geoApiPT.key}`,
+            },
             timeout: 5000,
           })
 
