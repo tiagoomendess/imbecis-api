@@ -10,6 +10,8 @@ export const createReportUC = async (request : CreateReportRequest) : Promise<Re
         throw new Error('Denúncia bloqueada por suspeitas de fraude');
     }
 
+    const occurredAt = request.occurredAt ? new Date(request.occurredAt) : new Date();
+
     const result = await createReport({
         location: {
             latitude: request.location.latitude,
@@ -20,7 +22,8 @@ export const createReportUC = async (request : CreateReportRequest) : Promise<Re
         userAgent: request.userAgent,
         status: STATUS.NEW,
         reporterInfo: request.reporterInfo,
-        imageHash: request.imageHash
+        imageHash: request.imageHash,
+        occurredAt
     } as Report)
 
     if (!result) {

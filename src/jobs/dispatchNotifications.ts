@@ -70,6 +70,9 @@ const handleRegions = async (report: Report, regions: NotificationRegion[]): Pro
     return
 }
 
+const getInfractionDate = (report: Report): Date =>
+    report.occurredAt ?? report.createdAt;
+
 const getReportPublicUrl = (report: Report) => {
     let countryCode = report.plate?.country || 'unknown'
 
@@ -88,7 +91,7 @@ const handleRedditNotification = async (region: NotificationRegion, report: Repo
         // wait 1 second to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        const date = new Date(report.createdAt).toLocaleDateString('pt-PT');
+        const date = new Date(getInfractionDate(report)).toLocaleDateString('pt-PT');
         await postUrl(
             `${report.plate?.number} estacionou abusivamente em ${report.municipality} no dia ${date}`,
             getReportPublicUrl(report),
@@ -132,7 +135,7 @@ const handleEmailNotification = async (region: NotificationRegion, report: Repor
     let success = true;
     let errorMessage = '';
     try {
-        const dateStr = new Date(report.createdAt).toLocaleDateString('pt-PT');
+        const dateStr = new Date(getInfractionDate(report)).toLocaleDateString('pt-PT');
         const body = buildBody(report);
         const cc = report.reporterInfo ? [
             { email: report.reporterInfo.email, name: report.reporterInfo.name }
@@ -169,8 +172,8 @@ const buildBody = (report: Report): string => {
         throw new Error('GeoInfo is required to build the email body');
     }
 
-    const day = new Date(report.createdAt).toLocaleDateString('pt-PT');
-    const time = new Date(report.createdAt).toLocaleTimeString('pt-PT');
+    const day = new Date(getInfractionDate(report)).toLocaleDateString('pt-PT');
+    const time = new Date(getInfractionDate(report)).toLocaleTimeString('pt-PT');
 
     let message = `<p>Excelentíssimos Agentes de Autoridade</p>`
 

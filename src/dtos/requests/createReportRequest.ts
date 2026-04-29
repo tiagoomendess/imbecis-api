@@ -1,6 +1,7 @@
-import { IsIP, IsNotEmpty, IsObject, IsString, IsUUID, ValidateNested, Length, IsOptional } from 'class-validator';
+import { IsIP, IsNotEmpty, IsObject, IsString, IsUUID, ValidateNested, Length, IsOptional, IsDateString, Validate } from 'class-validator';
 import { CoordinateDto } from '../coordinateDto';
 import { ReporterInfo } from '../reporterInfo';
+import { IsRecentPastDate } from '../validators/isRecentPastDate';
 
 export class CreateReportRequest {
     constructor() {
@@ -19,6 +20,11 @@ export class CreateReportRequest {
     @IsString({ message: 'Image Hash is not a string invalid'})
     @Length(63, 65, { message: 'Image Hash is invalid'})
     public imageHash: string
+
+    @IsOptional()
+    @IsDateString({}, { message: 'occurredAt must be a valid ISO date string' })
+    @Validate(IsRecentPastDate)
+    public occurredAt?: string
 
     @IsOptional()
     @ValidateNested()

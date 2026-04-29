@@ -14,6 +14,7 @@ export interface ReportInListDto {
     confirmedPlate?: PlateInListDto
     notSureVotes: number
     imbecileVotes: number
+    occurredAt: Date
     createdAt: Date
     updatedAt: Date
 }

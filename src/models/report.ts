@@ -56,6 +56,7 @@ export interface Report {
     reporterInfo?: ReporterInfo;
     geoInfo?: GeoInfo;
     reportVotes?: ReportVote[];
+    occurredAt?: Date;
     createdAt: Date;
     updatedAt: Date;
 }

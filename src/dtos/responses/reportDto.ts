@@ -10,6 +10,7 @@ export interface ReportDto {
     pictureSignedUrl?: string
     plateId?: string
     plate?: PlateDto
+    occurredAt: Date
     createdAt: Date
     updatedAt: Date
 }
@@ -27,6 +28,7 @@ export const newReportDto = (report: Report | null): ReportDto | null => {
         picture: report.picture,
         plateId: report.plateId?.toString(),
         plate: newPlateDto(report.plate),
+        occurredAt: report.occurredAt ?? report.createdAt,
         createdAt: report.createdAt,
         updatedAt: report.updatedAt
     }

@@ -62,6 +62,7 @@ const newReportInListDto = (report: Report): ReportInListDto => {
         originalPicture: report.originalPicture,
         publicPicture: report.picture,
         municipality: report.municipality,
+        occurredAt: report.occurredAt ?? report.createdAt,
         createdAt: report.createdAt,
         updatedAt: report.updatedAt
     } as ReportInListDto
