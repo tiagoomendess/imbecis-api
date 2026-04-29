@@ -4,6 +4,13 @@ import Logger from '../utils/logger'
 
 const BASE_URL = 'https://json.geoapi.pt'
 
+export class LocationNotFoundError extends Error {
+    constructor(message: string) {
+        super(message)
+        this.name = 'LocationNotFoundError'
+    }
+}
+
 export const getMunicipalityByCoords = async (latitude: number, longitude: number): Promise<string | null> => {
     try {
         console.log(`API KEY: ${config.geoApiPT.key}`)
@@ -79,11 +86,12 @@ export const getFullInfoByCoords = async (latitude: number, longitude: number): 
         Logger.error(`Could not get full info for coordinates ${latitude}, ${longitude} from GeoApiPT: ${error}`)
 
         if (error instanceof axios.AxiosError && error.response) {
-            // Log response body for debugging
             Logger.error(`GeoApiPT response error: ${JSON.stringify(error.response.data)}`)
-
-            // Log response headers for debugging
             Logger.error(`GeoApiPT response headers: ${JSON.stringify(error.response.headers)}`)
+
+            if (error.response.status === 404) {
+                throw new LocationNotFoundError(`No location found for coordinates ${latitude}, ${longitude}`)
+            }
         }
 
         return null
