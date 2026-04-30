@@ -11,6 +11,7 @@ import { ListReportsRequest } from "../dtos/requests/listReportsRequest";
 import { UpdateReportRequest } from "../dtos/requests/updateReportRequest";
 import { DeleteReportRequest } from "../dtos/requests/deleteReportRequest";
 import { HeatMapRequest } from "../dtos/requests/heatMapRequest";
+import { ListConfirmedReportsRequest } from "../dtos/requests/listConfirmedReportsRequest";
 
 import { uploadReportPictureUC } from "../useCases/uploadReportPicture";
 import { getReportForReviewUC } from "../useCases/getReportForReview";
@@ -24,6 +25,7 @@ import { listReportsUC } from "../useCases/listReports";
 import { updateReportUC } from "../useCases/updateReport";
 import { deleteReportUC } from "../useCases/deleteReport";
 import { getHeatMapCoordinatesUC } from "../useCases/getHeatMapCoordinatesUC";
+import { listConfirmedReportsUC } from "../useCases/listConfirmedReports";
 
 import { BadRequestError } from "../errors";
 import { UpdateReportPictureRequest } from "../dtos/requests/updateReportPictureRequest";
@@ -199,6 +201,20 @@ export const deleteReport = async (req: Request, res: Response, next: NextFuncti
             message: "Denúncia eliminada com sucesso",
             payload: null
         } as BaseResponse)
+    } catch (error) {
+        return next(error)
+    }
+}
+
+export const listConfirmedReports = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { meta, data } = await listConfirmedReportsUC(req.body as ListConfirmedReportsRequest)
+        res.status(200).send({
+            success: true,
+            message: "Confirmed reports",
+            meta,
+            payload: data
+        })
     } catch (error) {
         return next(error)
     }

@@ -451,6 +451,78 @@ export const deleteReport = async (id: ObjectId): Promise<boolean> => {
     return result.deletedCount > 0;
 }
 
+export interface ListConfirmedReportsParams {
+    page: number
+    pageSize: number
+    fromTime?: Date
+    toTime?: Date
+    municipality?: string
+}
+
+export interface ListConfirmedReportsResult {
+    data: Report[]
+    total: number
+}
+
+export const listConfirmedReports = async (params: ListConfirmedReportsParams): Promise<ListConfirmedReportsResult> => {
+    const { page, pageSize, fromTime, toTime, municipality } = params
+
+    const initialMatch: any = { status: STATUS.CONFIRMED }
+    if (municipality) {
+        initialMatch.municipality = municipality
+    }
+
+    const timeMatch: any = {}
+    if (fromTime) timeMatch.$gte = fromTime
+    if (toTime) timeMatch.$lte = toTime
+
+    const pipeline: any[] = [
+        { $match: initialMatch },
+        { $addFields: { effectiveDate: { $ifNull: ['$occurredAt', '$createdAt'] } } },
+    ]
+
+    if (fromTime || toTime) {
+        pipeline.push({ $match: { effectiveDate: timeMatch } })
+    }
+
+    pipeline.push({ $sort: { effectiveDate: -1 } })
+
+    pipeline.push({
+        $facet: {
+            data: [
+                { $skip: (page - 1) * pageSize },
+                { $limit: pageSize },
+                {
+                    $lookup: {
+                        from: 'plates',
+                        localField: 'plateId',
+                        foreignField: '_id',
+                        as: 'plate',
+                    },
+                },
+                {
+                    $unwind: {
+                        path: '$plate',
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+            ],
+            meta: [{ $count: 'total' }],
+        },
+    })
+
+    const results = await db
+        .collection<Report>(collection)
+        .aggregate<{ data: Report[]; meta: { total: number }[] }>(pipeline)
+        .toArray()
+
+    const facet = results[0]
+    return {
+        data: facet?.data ?? [],
+        total: facet?.meta?.[0]?.total ?? 0,
+    }
+}
+
 export const getHeatMapCoordinates = async (): Promise<HeatMapCoordinate[]> => {
 
     const coordinates = await db
