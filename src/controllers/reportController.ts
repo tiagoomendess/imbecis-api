@@ -12,6 +12,7 @@ import { UpdateReportRequest } from "../dtos/requests/updateReportRequest";
 import { DeleteReportRequest } from "../dtos/requests/deleteReportRequest";
 import { HeatMapRequest } from "../dtos/requests/heatMapRequest";
 import { ListConfirmedReportsRequest } from "../dtos/requests/listConfirmedReportsRequest";
+import { ListMyReportsRequest } from "../dtos/requests/listMyReportsRequest";
 
 import { uploadReportPictureUC } from "../useCases/uploadReportPicture";
 import { getReportForReviewUC } from "../useCases/getReportForReview";
@@ -26,6 +27,7 @@ import { updateReportUC } from "../useCases/updateReport";
 import { deleteReportUC } from "../useCases/deleteReport";
 import { getHeatMapCoordinatesUC } from "../useCases/getHeatMapCoordinatesUC";
 import { listConfirmedReportsUC } from "../useCases/listConfirmedReports";
+import { listMyReportsUC } from "../useCases/listMyReports";
 
 import { BadRequestError } from "../errors";
 import { UpdateReportPictureRequest } from "../dtos/requests/updateReportPictureRequest";
@@ -212,6 +214,20 @@ export const listConfirmedReports = async (req: Request, res: Response, next: Ne
         res.status(200).send({
             success: true,
             message: "Confirmed reports",
+            meta,
+            payload: data
+        })
+    } catch (error) {
+        return next(error)
+    }
+}
+
+export const listMyReports = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { meta, data } = await listMyReportsUC(req.body as ListMyReportsRequest)
+        res.status(200).send({
+            success: true,
+            message: "My reports",
             meta,
             payload: data
         })

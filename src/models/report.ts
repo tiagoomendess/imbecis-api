@@ -451,6 +451,44 @@ export const deleteReport = async (id: ObjectId): Promise<boolean> => {
     return result.deletedCount > 0;
 }
 
+export interface ListMyReportsParams {
+    deviceUUID: string
+    page: number
+    pageSize: number
+}
+
+export interface ListMyReportsResult {
+    data: Report[]
+    total: number
+}
+
+export const listReportsByDeviceUUID = async (params: ListMyReportsParams): Promise<ListMyReportsResult> => {
+    const { deviceUUID, page, pageSize } = params
+
+    const pipeline: any[] = [
+        { $match: { deviceUUID, status: { $ne: STATUS.REMOVED } } },
+        { $addFields: { effectiveDate: { $ifNull: ['$occurredAt', '$createdAt'] } } },
+        { $sort: { effectiveDate: -1 } },
+        {
+            $facet: {
+                data: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
+                meta: [{ $count: 'total' }],
+            },
+        },
+    ]
+
+    const results = await db
+        .collection<Report>(collection)
+        .aggregate<{ data: Report[]; meta: { total: number }[] }>(pipeline)
+        .toArray()
+
+    const facet = results[0]
+    return {
+        data: facet?.data ?? [],
+        total: facet?.meta?.[0]?.total ?? 0,
+    }
+}
+
 export interface ListConfirmedReportsParams {
     page: number
     pageSize: number
