@@ -134,8 +134,7 @@ const renderContent = async (doc: PDFKit.PDFDocument, report: Report): Promise<v
     doc.font('Helvetica').fontSize(11)
         .text(
             'O Cidadão que denuncia esta infração deseja usar do seu direito previsto no n.º 5 do artigo 170.º do Código da Estrada. Este artigo prevê que a autoridade que tiver notícia ' +
-            'por denúncia de contra-ordenação, levanta auto, não carecendo de presenciar tal contra-ordenação rodoviária, ' +
-            'situação a que se aplica o n.º 1 do mesmo artigo.',
+            'por denúncia de contra-ordenação, levanta auto, não carecendo de presenciar tal contra-ordenação rodoviária.',
         )
     doc.moveDown(0.8)
 
