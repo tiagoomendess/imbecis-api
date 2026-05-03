@@ -14,8 +14,8 @@ export const createReportUC = async (request : CreateReportRequest) : Promise<Re
 
     const result = await createReport({
         location: {
-            latitude: request.location.latitude,
-            longitude: request.location.longitude
+            latitude: parseFloat(request.location.latitude.toFixed(5)),
+            longitude: parseFloat(request.location.longitude.toFixed(5))
         },
         deviceUUID: request.deviceUUID,
         ipAddress: request.ipAddress,
