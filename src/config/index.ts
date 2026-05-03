@@ -21,6 +21,9 @@ const AppConfig = {
       key: <string>process.env.GEO_API_PT_KEY || "abcdef12345",
       proxyPassword: <string>process.env.GEO_API_PT_PROXY_PASSWORD || "thisnotakey",
     },
+    googleGeocode: {
+      key: <string>process.env.GOOGLE_GEOCODE_API_KEY || "",
+    },
     db: {
       mongoUri: <string>process.env.MONGO_URI || "",
       mongoDb: <string>process.env.MONGO_DB || "",

@@ -1,6 +1,7 @@
 import { GeoInfo, getReportsToFillGeoInfo, updateReport, STATUS } from '../models/report'
 import Logger from '../utils/logger';
 import { getFullInfoByCoords, LocationNotFoundError } from '../gateways/geoApiPT';
+import { getAddressByCoords } from '../gateways/googleGeocode';
 
 export const fillGeoLocationData = async () => {
     Logger.info("=== Starting fillGeoLocationData job ====================")
@@ -59,7 +60,18 @@ const getGeoinfo = async (lat : number, lon : number) : Promise<GeoInfo | null> 
     while (tries < 3) {
         try {
             const info = await getFullInfoByCoords(lat, lon)
-            if (info) return info
+            if (info) {
+                if (!info.rua) {
+                    const googleInfo = await getAddressByCoords(lat, lon)
+                    if (googleInfo) {
+                        if (!info.rua && googleInfo.rua) info.rua = googleInfo.rua
+                        if (!info.n_porta && googleInfo.n_porta) info.n_porta = googleInfo.n_porta
+                        if (!info.CP && googleInfo.CP) info.CP = googleInfo.CP
+                        Logger.info(`Enriched geo info from Google for ${lat}, ${lon}`)
+                    }
+                }
+                return info
+            }
         } catch (err) {
             if (err instanceof LocationNotFoundError) throw err
             Logger.error(`Unexpected error fetching geo info for ${lat}, ${lon}: ${err}`)
