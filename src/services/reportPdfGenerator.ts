@@ -55,7 +55,6 @@ const renderContent = async (doc: PDFKit.PDFDocument, report: Report): Promise<v
     // Header
     doc.fontSize(18).font('Helvetica-Bold')
         .text('Denúncia de Estacionamento Abusivo', { align: 'center' })
-    doc.moveDown(0.5)
     doc.moveDown(1.5)
 
     // Salutation
