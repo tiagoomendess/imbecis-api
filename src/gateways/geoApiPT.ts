@@ -62,7 +62,7 @@ export const getFullInfoByCoords = async (latitude: number, longitude: number): 
             headers: {
                 'x-api-key': `${config.geoApiPT.key}`,
             },
-            timeout: 5000,
+            timeout: 15000,
           })
 
         const response = await axiosInstance.get(

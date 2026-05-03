@@ -26,7 +26,7 @@ export const updateReportUC = async (request : UpdateReportRequest): Promise<voi
     }
 
     const hasPlate = request.plateNumber && request.plateCountry
-    if (!hasPlate && [STATUS.NOTIFY, STATUS.CONFIRMED, STATUS.CONFIRMED_BLUR_PLATES].includes(request.status)) {
+    if (!hasPlate && [STATUS.CONFIRMED_BLUR_PLATES, STATUS.GENERATE_PDF, STATUS.NOTIFY, STATUS.CONFIRMED].includes(request.status)) {
         throw new BadRequestError('Denúncia deve ter uma matrícula associada para ser movida para este estado');
     }
     

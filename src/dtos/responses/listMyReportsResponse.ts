@@ -1,6 +1,7 @@
 export interface MyReportItemDto {
     id: string
     picture: string | null
+    pdf: string | null
     status: string
     municipality: string | null
     occurredAt: string

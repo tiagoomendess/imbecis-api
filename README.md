@@ -12,7 +12,7 @@ The platform collects reports from users, runs a community review workflow, and 
 5. After plate blurring and final checks, the report is published in the public feed and linked to a plate history.
 6. Rejected or moderated reports are removed from public lifecycle and sensitive metadata is scrubbed.
 
-This lifecycle is implemented through report statuses (`new`, `fill_geo_info`, `review`, `notify`, `confirmed_blur_plates`, `confirmed`, plus moderation statuses such as `rejected` and `removed`).
+This lifecycle is implemented through report statuses (`new`, `fill_geo_info`, `review`, `confirmed_blur_plates`, `generate_pdf`, `notify`, `confirmed`, plus moderation statuses such as `rejected` and `removed`).
 
 ## Architecture Overview
 
@@ -63,8 +63,9 @@ Code organization follows a layered style:
 
 Cron worker runs periodic jobs that:
 - fill geolocation details (GeoAPI.pt),
-- dispatch notifications (email/reddit based on feature flags),
-- blur plates before final publication.
+- blur plates after community approval,
+- generate a PDF record of each confirmed report (stored in S3 under `pdfs/reports/`),
+- dispatch notifications (email/reddit based on feature flags).
 
 External integrations include:
 - S3-compatible storage for images,

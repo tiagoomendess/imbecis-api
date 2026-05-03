@@ -17,9 +17,15 @@ export const listMyReportsUC = async (request: ListMyReportsRequest): Promise<Li
             picture = (await s3.getPublicUrl(picture)) ?? null
         }
 
+        let pdf: string | null = report.pdfPath ?? null
+        if (pdf) {
+            pdf = (await s3.getPublicUrl(pdf)) ?? null
+        }
+
         data.push({
             id: report._id.toHexString(),
             picture,
+            pdf,
             status: report.status,
             municipality: report.municipality ?? null,
             occurredAt: (report.occurredAt ?? report.createdAt).toISOString(),

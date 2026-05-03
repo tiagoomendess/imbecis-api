@@ -21,7 +21,7 @@ export const blurPlatesAfterConfirm = async () => {
         if (report.platesBluredAt) {
             Logger.warn(`Report ${report._id} already has plates blured, skipping...`)
             alreadyBlured++
-            report.status = STATUS.CONFIRMED
+            report.status = STATUS.GENERATE_PDF
             await updateReport(report)
             continue
         }
@@ -38,7 +38,7 @@ export const blurPlatesAfterConfirm = async () => {
         if (!imageStream) {
             Logger.error(`Error downloading image for report ${report._id}`)
             failed++
-            report.status = STATUS.CONFIRMED
+            report.status = STATUS.GENERATE_PDF
             await updateReport(report)
             continue
         }
@@ -47,7 +47,7 @@ export const blurPlatesAfterConfirm = async () => {
         if (!newPicture) {
             Logger.error(`Error blurring plates for report ${report._id}`)
             failed++
-            report.status = STATUS.CONFIRMED
+            report.status = STATUS.GENERATE_PDF
             await updateReport(report)
             continue
         }
@@ -59,13 +59,13 @@ export const blurPlatesAfterConfirm = async () => {
         } catch (err) {
             Logger.error(`Error building and uploading image back up ${report._id}: ${err}`)
             failed++
-            report.status = STATUS.CONFIRMED
+            report.status = STATUS.GENERATE_PDF
             await updateReport(report)
             continue
         }
 
         try {
-            report.status = STATUS.CONFIRMED
+            report.status = STATUS.GENERATE_PDF
             report.platesBluredAt = new Date()
             await updateReport(report)
         } catch (err) {

@@ -6,8 +6,9 @@ import config from '../config';
 import type { EmailContact } from '../dtos/emailContact';
 
 import { findRegionsByPoint, NotificationRegion } from '../models/notificationRegion';
-import { STATUS, getReportsByStatus, Report, updateReport, type GeoInfo } from '../models/report';
+import { STATUS, getReportsByStatus, Report, updateReport } from '../models/report';
 import { createNotificationHistory, type NotificationHistory } from '../models/notificationHistory';
+import { getAddress, getDocumentTypeStr, getGoogleMapsLink, getInfractionDate } from '../utils/reportFormatting';
 
 export const dispatchNotifications = async () => {
     Logger.info("=== Starting dispatchNotifications job ====================");
@@ -27,7 +28,7 @@ const doDispatchNotifications = async () => {
 
     // For each report find the region it's coordinates are in
     for (const report of reports) {
-        report.status = STATUS.CONFIRMED_BLUR_PLATES;
+        report.status = STATUS.CONFIRMED;
         const regions = await findRegionsByPoint(report.location);
         Logger.info(`Found ${regions.length} regions for report ${report._id}`);
         if (regions.length === 0) {
@@ -38,7 +39,7 @@ const doDispatchNotifications = async () => {
 
         await handleRegions(report, regions);
 
-        // Update to confirmed_blur_plates and remove reporter info
+        // Move to confirmed and remove reporter info (blurring already happened upstream)
         report.reporterInfo = undefined;
         await updateReport(report);
     }
@@ -69,9 +70,6 @@ const handleRegions = async (report: Report, regions: NotificationRegion[]): Pro
 
     return
 }
-
-const getInfractionDate = (report: Report): Date =>
-    report.occurredAt ?? report.createdAt;
 
 const getReportPublicUrl = (report: Report) => {
     let countryCode = report.plate?.country || 'unknown'
@@ -184,41 +182,19 @@ const buildBody = (report: Report): string => {
 
     message += `<p>A fotografia, que foi tirada através da aplicação de denúncias, e que comprova a infração, pode ser <b>pré visualizada</b> abaixo:</p>`
     message += `<img src="${getImageUrl(report)}" alt="Fotografia da viatura" style="max-width: 100%;"/>`
-    message += `<p>A seguinte hash criptográfica, gerada no momento e local da infração, ainda no dispositivo do denunciante, e a partir da fotografia reproduzida 
-    imediatamente após esta ser capturada, prova que a imagem não foi adulterada enquanto armazenada ou em trânsito. <b>Hash SHA256:</b> ${report.imageHash}. 
-    A imagem original está disponível <a href="${getImageUrl(report)}">aqui</a>, e a hash pode ser validada através de qualquer ferramenta online, como por exemplo 
+    message += `<p>A seguinte hash criptográfica, gerada no momento, ainda no dispositivo do denunciante, prova que a imagem não foi adulterada enquanto armazenada ou em trânsito. 
+    <b>Hash SHA256:</b> ${report.imageHash}. A imagem original está disponível <a href="${getImageUrl(report)}">aqui</a>, e a hash pode ser validada através de qualquer ferramenta online, como por exemplo 
     <a href="https://emn178.github.io/online-tools/sha256_checksum.html">esta</a>.</p>`
 
     message += addReporterInfo(report);
 
-    message += `<p>De recordar que ao abrigo do <b>n.º 5 do artigo 170.º</b> do Código da Estrada, a autoridade que tiver notícia 
+    message += `<p>O Cidadão que denuncia esta infração deseja usar do seu direito previsto no n.º 5 do artigo 170.º do Código da Estrada. Este artigo prevê que a autoridade que tiver notícia 
     por denúncia de contra-ordenação, levanta auto, não carecendo de presenciar tal contra-ordenação rodoviária, situação a que se 
     aplica o n.º 1 do mesmo artigo.</p>`
 
-    message += `<p>Serve o presente email como denúncia, para quaisquer esclarecimentos não hesitem em entrar em contacto.</p>`
     message += `<p>Sem mais de momento,<br/>Continuação de um bom dia e obrigado pela atenção.</p>`
 
-    message += `<small style="opacity: 75%">Esta denúncia foi validada e confirmada por, pelo menos, 3 pessoas diferentes para além do denunciante antes de 
-    ser automaticamente enviada para este endereço de email. Endereço esse que foi o escolhido por ter sido identificado como pertencendo à autoridade responsável 
-    pela fiscalização rodoviária na localização da alegada infração. Caso não seja o caso, por favor encaminhe este email para quem de direito, e avise 
-    respondendo a este email para ser efectuada a alteração no sistema, para que eventuais denúncias futuras, sejam enviadas para a entidade correta.</small>`
-
     return message
-}
-
-const getAddress = (locationFullInfo: GeoInfo): string => {
-
-    let street = locationFullInfo.rua ? `${locationFullInfo.rua}` : '';
-    let number = locationFullInfo.n_porta ? ` ${locationFullInfo.n_porta}` : '';
-    let postalCode = locationFullInfo.CP ? `, ${locationFullInfo.CP}` : '';
-    let freguesia = locationFullInfo.freguesia ? `, ${locationFullInfo.freguesia}` : '';
-    let municipality = locationFullInfo.concelho ? `, ${locationFullInfo.concelho}` : '';
-
-    return `${street}${number}${postalCode}${freguesia}${municipality}`
-}
-
-const getGoogleMapsLink = (report: Report): string => {
-    return `https://www.google.com/maps/search/?api=1&query=${report.location.latitude},${report.location.longitude}`;
 }
 
 const getImageUrl = (report: Report): string => {
@@ -251,15 +227,3 @@ const addReporterInfo = (report: Report): string => {
     return message
 }
 
-const getDocumentTypeStr = (idType: string): string => {
-    switch (idType) {
-        case 'cc':
-            return 'Cartão de Cidadão';
-        case 'residency':
-            return 'Autorização de Residência';
-        case 'passport':
-            return 'Passaporte';
-        default:
-            return '';
-    }
-}

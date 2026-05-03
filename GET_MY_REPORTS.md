@@ -59,6 +59,7 @@ curl http://localhost:3000/reports/mine \
         {
             "id": "69f3a084f3a164e5562c4d20",
             "picture": "https://cdn.imbecis.app/pictures/reports/1d455bfc-0a8c-41f5-ace4-8fd3f8b1180c.webp",
+            "pdf": "https://cdn.imbecis.app/pdfs/reports/3f2a1b9c-7e4d-48f0-b123-456789abcdef.pdf",
             "status": "confirmed",
             "municipality": "Braga",
             "occurredAt": "2026-04-30T14:22:00.000Z"
@@ -66,6 +67,7 @@ curl http://localhost:3000/reports/mine \
         {
             "id": "69f3a084f3a164e5562c4d21",
             "picture": null,
+            "pdf": null,
             "status": "new",
             "municipality": null,
             "occurredAt": "2026-04-30T14:10:00.000Z"
@@ -100,6 +102,7 @@ curl http://localhost:3000/reports/mine \
 |----------------|----------------|----------------------------------------------------------------------------------------------------------------|
 | `id`           | string         | MongoDB ObjectId of the report as a hex string.                                                                |
 | `picture`      | string \| null | Public CDN URL of the report image. `null` if no picture has been uploaded yet.                               |
+| `pdf`          | string \| null | Public CDN URL of the generated PDF for this report. Only set after the `generate_pdf` step completes. `null` otherwise. Only visible to the submitting device. |
 | `status`       | string         | Current lifecycle status of the report (see status reference below).                                           |
 | `municipality` | string \| null | Municipality where the report was filed. `null` for reports that have not yet been through geolocation enrichment. |
 | `occurredAt`   | string         | ISO 8601 date-time of when the infraction was witnessed. Falls back to `createdAt` for older reports that pre-date that field. |
@@ -112,7 +115,8 @@ curl http://localhost:3000/reports/mine \
 | `fill_geo_info`            | Geolocation enrichment in progress.                                            |
 | `review`                   | Open for community voting.                                                     |
 | `confirmed_blur_plates`    | Approved by votes; plate-blurring in progress.                                 |
-| `notify`                   | Notifications being dispatched.                                                |
+| `generate_pdf`             | Plates blurred; PDF report being generated and uploaded.                       |
+| `notify`                   | Notifications being dispatched to the relevant authorities.                    |
 | `confirmed`                | Publicly confirmed and visible.                                                |
 | `confirmed_manual_verify`  | Flagged for manual review before final publication.                            |
 | `rejected`                 | Rejected by community vote.                                                    |

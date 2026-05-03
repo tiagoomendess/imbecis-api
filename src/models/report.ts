@@ -10,8 +10,9 @@ export const STATUS = {
     FILL_GEO_INFO: 'fill_geo_info',
     REVIEW: 'review',
     REJECTED: 'rejected',
-    NOTIFY: 'notify', // This state will notify whatever is configured
     CONFIRMED_BLUR_PLATES: 'confirmed_blur_plates', // This state will blur the plates
+    GENERATE_PDF: 'generate_pdf', // This state will generate and upload the report PDF
+    NOTIFY: 'notify', // This state will notify whatever is configured
     CONFIRMED: 'confirmed', // This state make the report public
     CONFIRMED_MANUAL_VERIFY: 'confirmed_manual_verify', // When report deem to risky for automatic confirmation
     REMOVED: 'removed', // Soft delete
@@ -53,6 +54,8 @@ export interface Report {
     platesBluredAt?: Date;
     originalPicture?: string;
     imageHash?: string;
+    pdfPath?: string;
+    pdfGeneratedAt?: Date;
     reporterInfo?: ReporterInfo;
     geoInfo?: GeoInfo;
     reportVotes?: ReportVote[];
@@ -255,7 +258,7 @@ export const getReportsByPlateId = async (plateId: ObjectId, page: number = 1): 
             {
                 $match: {
                     plateId: plateId,
-                    status: { $in: [STATUS.CONFIRMED, STATUS.NOTIFY, STATUS.CONFIRMED_BLUR_PLATES] },
+                    status: { $in: [STATUS.CONFIRMED, STATUS.NOTIFY, STATUS.CONFIRMED_BLUR_PLATES, STATUS.GENERATE_PDF] },
                 }
             },
             { $sort: { updatedAt: -1 } },

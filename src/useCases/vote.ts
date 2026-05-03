@@ -105,7 +105,7 @@ const runTransitionVerification = async (report: Report, votes: ReportVote[]) =>
                 Logger.info(`Plate ${plateNumber} has ${plateNumbers[plateNumber]} votes and will be confirmed as imbecile`)
                 const plate = await getOrCreatePlate(plateNumber, mostVotedCountry)
                 report.plateId = plate._id
-                report.status = STATUS.NOTIFY
+                report.status = STATUS.CONFIRMED_BLUR_PLATES
                 report.userAgent = "redacted"
                 report.ipAddress = "redacted"
                 await updateReport(report)
