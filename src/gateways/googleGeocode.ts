@@ -12,13 +12,11 @@ export interface GoogleGeocodeAddress {
 
 export const getAddressByCoords = async (latitude: number, longitude: number): Promise<GoogleGeocodeAddress | null> => {
     try {
-        const response = await axios.get(BASE_URL, {
-            params: {
-                latlng: `${latitude},${longitude}`,
-                key: config.googleGeocode.key,
-                language: 'pt',
-                result_type: 'street_address|premise|route',
-            },
+
+        const url = `${BASE_URL}?latlng=${latitude},${longitude}&key=${config.googleGeocode.key}&language=pt&result_type=street_address|premise|route`
+        console.log(`Google Geocode URL: ${url}`)
+
+        const response = await axios.get(url, {
             timeout: 15000,
         })
 
