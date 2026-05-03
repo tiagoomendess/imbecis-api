@@ -24,7 +24,7 @@ export const getMunicipalityByCoords = async (latitude: number, longitude: numbe
                 headers: {
                     'x-api-Key': `${config.geoApiPT.key}`,
                 },
-                timeout: 5000,
+                timeout: 15000,
             }
         )
         if (response.status !== 200) {
@@ -66,7 +66,7 @@ export const getFullInfoByCoords = async (latitude: number, longitude: number): 
           })
 
         const response = await axiosInstance.get(
-            `${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=true`
+            `${BASE_URL}/gps?lat=${latitude}&lon=${longitude}&ext-apis=false`
         )
 
         if (response.headers) {

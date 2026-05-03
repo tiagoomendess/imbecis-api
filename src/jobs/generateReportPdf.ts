@@ -1,6 +1,7 @@
 import { STATUS, getReportsByStatus, updateReport } from '../models/report'
 import { generateAndUploadReportPdf } from '../services/reportPdfGenerator'
 import Logger from '../utils/logger'
+import s3 from '../storage/s3'
 
 export const generateReportPdfs = async () => {
     Logger.info('=== Starting generateReportPdfs job ====================')
@@ -18,10 +19,14 @@ const doGenerateReportPdfs = async () => {
 
     for (const report of reports) {
         if (report.pdfPath) {
-            Logger.warn(`Report ${report._id} already has a PDF, advancing to notify`)
-            report.status = STATUS.NOTIFY
-            await updateReport(report)
-            continue
+            Logger.info(`Report ${report._id} already has a PDF at ${report.pdfPath}, deleting before regeneration`)
+            try {
+                await s3.deleteObject(report.pdfPath)
+                report.pdfPath = undefined
+                report.pdfGeneratedAt = undefined
+            } catch (err) {
+                Logger.warn(`Could not delete old PDF for report ${report._id}: ${err}`)
+            }
         }
 
         try {
